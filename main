@@ -9,8 +9,8 @@
   <h2>スタンプ処理中...</h2>
 
   <script>
-    const liffId = "YOUR_LIFF_ID";  // ← 後で差し替える
-    const apiUrl = "YOUR_GAS_ENDPOINT"; // ← 後で差し替える
+    const liffId = "2011752461-qIktF1m8";  
+    const apiUrl = "YOUR_GAS_ENDPOINT"; // ← GAS を作ったらここを差し替える
 
     async function main() {
       await liff.init({ liffId });
