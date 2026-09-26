@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Stamp</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h2>スタンプ処理中...</h2>
+
+  <script>
+    const liffId = "2011752461-qIktF1m8";  
+    const apiUrl = "YOUR_GAS_ENDPOINT"; // ← GAS を作ったらここを差し替える
+
+    async function main() {
+      await liff.init({ liffId });
+
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+
+      const params = new URLSearchParams(window.location.search);
+      const eventId = params.get("event") || "default";
+
+      await fetch(apiUrl, {
+        method: "POST",
+        body: JSON.stringify({
+          userId,
+          eventId,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      document.body.innerHTML = `
+        <h2>スタンプを記録しました！</h2>
+        <p>ユーザーID: ${userId}</p>
+        <p>イベント: ${eventId}</p>
+      `;
+    }
+
+    main();
+  </script>
+</body>
+</html>
