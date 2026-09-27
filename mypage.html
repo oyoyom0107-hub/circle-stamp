@@ -53,23 +53,19 @@
       border-radius: 10px;
       margin-bottom: 12px;
       border-left: 6px solid #4a90e2;
-      transition: transform 0.15s ease;
     }
 
-    .record:hover {
-      transform: translateY(-3px);
-    }
-
-    .event {
-      font-size: 18px;
+    .event-name {
+      font-size: 20px;
       font-weight: bold;
-      color: #34495e;
+      color: #2c3e50;
+      margin-bottom: 6px;
     }
 
-    .time {
-      font-size: 14px;
-      color: #7f8c8d;
-      margin-top: 5px;
+    .info {
+      font-size: 15px;
+      margin: 3px 0;
+      color: #555;
     }
 
     .footer {
@@ -99,7 +95,12 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <script>
-const apiUrl = "https://script.google.com/macros/s/AKfycbxvrsDCZizsxMKFWt2Gd_nMBiNFgK5Tui3z-E1KN11Ic0QvDpOOEV-WHn8H0g58VfCM/exec";
+const apiUrl = "https://script.google.com/macros/s/AKfycbzFlaEaca6lVE4D2G5hNnacPrxM0u44GTuc-eVUtPuth5b4gp1q9XlBrrEd3kuTdrfh/exec";
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${d.getMinutes()}分`;
+}
 
 async function initLiff() {
   await liff.init({ liffId: "2011752461-qIktF1m8" });
@@ -122,13 +123,14 @@ async function loadRecords(userId) {
 
   totalEl.textContent = `合計スタンプ数：${data.length}`;
 
-  // 新しい順に並び替え
   data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   recordsEl.innerHTML = data.map(r => `
     <div class="record">
-      <div class="event">活動ID：${r.eventId}</div>
-      <div class="time">${r.timestamp}</div>
+      <div class="event-name">📌 ${r.eventName || "イベント名なし"}</div>
+      <div class="info">👤 ユーザー：${r.userName || "不明"}</div>
+      <div class="info">🏷 活動ID：${r.eventId}</div>
+      <div class="info">⏰ 日時：${formatDate(r.timestamp)}</div>
     </div>
   `).join("");
 }
