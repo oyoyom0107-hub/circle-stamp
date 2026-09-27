@@ -93,16 +93,6 @@
       display: inline-block;
     }
 
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      color: white;
-      font-size: 14px;
-      opacity: 0.8;
-      padding-bottom: 20px;
-    }
-
-    /* QR生成UI */
     .qr-input {
       width: 100%;
       padding: 10px;
@@ -116,6 +106,28 @@
       margin-top: 15px;
       font-size: 16px;
       word-break: break-all;
+    }
+
+    .qr-image {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .qr-image img {
+      width: 260px;
+      height: 260px;
+      border: 8px solid white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: white;
+      font-size: 14px;
+      opacity: 0.8;
+      padding-bottom: 20px;
     }
   </style>
 </head>
@@ -146,6 +158,9 @@
     <div class="csv-btn" onclick="generateQRUrl()">QRコード用URLを生成</div>
 
     <div id="qr-result" class="qr-result"></div>
+
+    <!-- ▼ QR画像表示 -->
+    <div id="qr-image" class="qr-image"></div>
   </div>
 
   <!-- ▼ 検索ボックス -->
@@ -201,6 +216,14 @@ function generateQRUrl() {
     <strong>生成されたURL：</strong><br>
     <span style="color:#0984e3;">${qrUrl}</span><br><br>
     このURLをQRコード作成サイトに貼り付けてください。
+  `;
+
+  // ▼ QR画像生成
+  const qrImgUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(qrUrl)}`;
+
+  document.getElementById("qr-image").innerHTML = `
+    <img src="${qrImgUrl}" alt="QRコード"><br>
+    <div style="margin-top:10px; font-size:14px;">画像を長押しして保存できます</div>
   `;
 }
 
