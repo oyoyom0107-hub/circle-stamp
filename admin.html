@@ -52,6 +52,16 @@
       font-size: 15px;
       margin: 4px 0;
     }
+
+    .csv-btn {
+      margin-top: 10px;
+      padding: 10px 15px;
+      background: #0984e3;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -61,17 +71,25 @@
 <div class="section-title">イベント別参加者一覧</div>
 <div id="events"></div>
 
+<div class="section-title">全ユーザーのスタンプ履歴 CSV</div>
+<div class="csv-btn" onclick="downloadAllCSV()">全ユーザーのスタンプ履歴をダウンロード</div>
+
+<div class="section-title">特典獲得者一覧 CSV</div>
+<div class="csv-btn" onclick="downloadBonusCSV()">特典獲得者一覧をダウンロード</div>
+
 <script>
 const apiUrl = "https://script.google.com/macros/s/AKfycbxvrsDCZizsxMKFWt2Gd_nMBiNFgK5Tui3z-E1KN11Ic0QvDpOOEV-WHn8H0g58VfCM/exec";
 
+let allData = []; // 全データを保持
+
 async function loadAllData() {
   const response = await fetch(apiUrl + "?all=true");
-  const data = await response.json();
+  allData = await response.json();
 
   // ▼ イベントごとにグループ化
   const events = {};
 
-  data.forEach(r => {
+  allData.forEach(r => {
     if (!events[r.eventId]) {
       events[r.eventId] = {
         eventName: r.eventName,
@@ -104,8 +122,81 @@ async function loadAllData() {
       card.appendChild(item);
     });
 
+    // ▼ CSV ダウンロードボタン（イベント別）
+    const csvBtn = document.createElement("div");
+    csvBtn.className = "csv-btn";
+    csvBtn.textContent = "このイベントの参加者を CSV ダウンロード";
+    csvBtn.onclick = () => downloadEventCSV(eventId, ev);
+    card.appendChild(csvBtn);
+
     eventsEl.appendChild(card);
   });
+}
+
+/* ▼ CSV生成関数 */
+function toCSV(rows) {
+  return rows.map(r => r.join(",")).join("\n");
+}
+
+/* ▼ ファイルとしてダウンロード */
+function downloadFile(filename, content) {
+  const blob = new Blob([content], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ▼ ① イベント別 CSV */
+function downloadEventCSV(eventId, ev) {
+  const rows = [["userId","userName","eventId","eventName","timestamp"]];
+
+  ev.participants.forEach(p => {
+    rows.push([p.userId, p.userName, p.eventId, p.eventName, p.timestamp]);
+  });
+
+  downloadFile(`${eventId}_participants.csv`, toCSV(rows));
+}
+
+/* ▼ ② 全ユーザーのスタンプ履歴 CSV */
+function downloadAllCSV() {
+  const rows = [["userId","userName","eventId","eventName","timestamp"]];
+
+  allData.forEach(p => {
+    rows.push([p.userId, p.userName, p.eventId, p.eventName, p.timestamp]);
+  });
+
+  downloadFile(`all_stamp_records.csv`, toCSV(rows));
+}
+
+/* ▼ ③ 特典獲得者一覧 CSV（5の倍数） */
+function downloadBonusCSV() {
+  const rows = [["userId","userName","stampCount","bonusCount"]];
+
+  const users = {};
+
+  allData.forEach(r => {
+    if (!users[r.userId]) users[r.userId] = [];
+    users[r.userId].push(r);
+  });
+
+  Object.keys(users).forEach(uid => {
+    const count = users[uid].length;
+    const bonus = Math.floor(count / 5);
+
+    if (bonus > 0) {
+      rows.push([
+        uid,
+        users[uid][0].userName,
+        count,
+        bonus
+      ]);
+    }
+  });
+
+  downloadFile(`bonus_users.csv`, toCSV(rows));
 }
 
 loadAllData();
