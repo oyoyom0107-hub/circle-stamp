@@ -56,11 +56,6 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    .event-card h3 {
-      margin: 0 0 10px;
-      color: #0984e3;
-    }
-
     .csv-btn {
       margin-top: 10px;
       padding: 10px 15px;
@@ -125,8 +120,8 @@
 
 <div class="container">
 
-  <!-- ▼ イベント編集機能 -->
-  <div class="section-title">イベント一覧編集</div>
+  <!-- ▼ イベント一覧編集（スプレッドシート同期） -->
+  <div class="section-title">イベント一覧編集（スプレッドシート同期）</div>
 
   <div class="event-card">
     <label>イベントID</label>
@@ -141,12 +136,12 @@
       <option value="off">記録のみ</option>
     </select>
 
-    <div class="csv-btn" onclick="addEvent()">イベントを追加</div>
+    <div class="csv-btn" onclick="addEvent()">イベントを追加 / 更新</div>
 
     <div id="event-list"></div>
   </div>
 
-  <!-- ▼ QRコード生成UI -->
+  <!-- ▼ QRコード生成 -->
   <div class="section-title">QRコード生成</div>
 
   <div class="event-card">
@@ -192,11 +187,41 @@ const apiUrl = "https://script.google.com/macros/s/AKfycbzoVQlPH6OWKKm58Bz2ImnNQ
 const ADMIN_USERS = ["ここに雄也のLINEユーザーIDを入れる"];
 
 let allData = [];
-let events = {};
-let eventSettings = JSON.parse(localStorage.getItem("eventSettings") || "{}");
+let eventSettings = [];
 
-/* ▼ イベント追加 */
-function addEvent() {
+/* ▼ イベント一覧をスプレッドシートから読み込む */
+async function loadEventSettings() {
+  const response = await fetch(apiUrl + "?events=true");
+  eventSettings = await response.json();
+  renderEventList();
+}
+
+/* ▼ イベント一覧表示 */
+function renderEventList() {
+  const list = document.getElementById("event-list");
+  list.innerHTML = "";
+
+  eventSettings.forEach(ev => {
+    list.innerHTML += `
+      <div style="margin-top:10px;">
+        <strong>${ev.eventName}</strong>（ID: ${ev.eventId}, mode: ${ev.stampMode}）
+        <span class="edit-btn" onclick="loadEvent('${ev.eventId}')">編集</span>
+        <span class="delete-btn" onclick="deleteEvent('${ev.eventId}')">削除</span>
+      </div>
+    `;
+  });
+}
+
+/* ▼ 編集モードに読み込み */
+function loadEvent(id) {
+  const ev = eventSettings.find(e => e.eventId === id);
+  document.getElementById("edit-event-id").value = ev.eventId;
+  document.getElementById("edit-event-name").value = ev.eventName;
+  document.getElementById("edit-stamp-mode").value = ev.stampMode;
+}
+
+/* ▼ イベント追加・更新（スプレッドシートへ送信） */
+async function addEvent() {
   const id = document.getElementById("edit-event-id").value.trim();
   const name = document.getElementById("edit-event-name").value.trim();
   const mode = document.getElementById("edit-stamp-mode").value;
@@ -206,43 +231,34 @@ function addEvent() {
     return;
   }
 
-  eventSettings[id] = { eventName: name, stampMode: mode };
-  localStorage.setItem("eventSettings", JSON.stringify(eventSettings));
+  const payload = {
+    type: "eventUpdate",
+    eventId: id,
+    eventName: name,
+    stampMode: mode
+  };
 
-  renderEventList();
-}
-
-/* ▼ イベント削除 */
-function deleteEvent(id) {
-  delete eventSettings[id];
-  localStorage.setItem("eventSettings", JSON.stringify(eventSettings));
-  renderEventList();
-}
-
-/* ▼ イベント一覧表示 */
-function renderEventList() {
-  const list = document.getElementById("event-list");
-  list.innerHTML = "";
-
-  Object.keys(eventSettings).forEach(id => {
-    const ev = eventSettings[id];
-
-    list.innerHTML += `
-      <div style="margin-top:10px;">
-        <strong>${ev.eventName}</strong>（ID: ${id}, mode: ${ev.stampMode}）
-        <span class="edit-btn" onclick="loadEvent('${id}')">編集</span>
-        <span class="delete-btn" onclick="deleteEvent('${id}')">削除</span>
-      </div>
-    `;
+  await fetch(apiUrl, {
+    method: "POST",
+    body: JSON.stringify(payload)
   });
+
+  loadEventSettings();
 }
 
-/* ▼ 編集モードに読み込み */
-function loadEvent(id) {
-  const ev = eventSettings[id];
-  document.getElementById("edit-event-id").value = id;
-  document.getElementById("edit-event-name").value = ev.eventName;
-  document.getElementById("edit-stamp-mode").value = ev.stampMode;
+/* ▼ イベント削除（スプレッドシートへ送信） */
+async function deleteEvent(id) {
+  const payload = {
+    type: "eventDelete",
+    eventId: id
+  };
+
+  await fetch(apiUrl, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+
+  loadEventSettings();
 }
 
 /* ▼ QRコード生成 */
@@ -283,41 +299,42 @@ async function checkAdmin() {
     return;
   }
 
+  loadEventSettings();
   loadAllData();
-  renderEventList();
 }
 
-/* ▼ データ読み込み */
+/* ▼ スタンプ履歴読み込み */
 async function loadAllData() {
   const response = await fetch(apiUrl + "?all=true");
   allData = await response.json();
-
-  events = {};
-  allData.forEach(r => {
-    if (!events[r.eventId]) events[r.eventId] = { eventName: r.eventName, participants: [] };
-    events[r.eventId].participants.push(r);
-  });
-
-  renderEvents(events);
+  renderEvents();
 }
 
 /* ▼ イベント別参加者一覧 */
-function renderEvents(eventData) {
+function renderEvents() {
   const eventsEl = document.getElementById("events");
   eventsEl.innerHTML = "";
 
-  Object.keys(eventData).forEach(eventId => {
-    const ev = eventData[eventId];
+  const grouped = {};
+
+  allData.forEach(r => {
+    if (!grouped[r.eventId]) grouped[r.eventId] = [];
+    grouped[r.eventId].push(r);
+  });
+
+  Object.keys(grouped).forEach(eventId => {
+    const participants = grouped[eventId];
+    const eventName = participants[0].eventName;
 
     const card = document.createElement("div");
     card.className = "event-card";
 
     card.innerHTML = `
-      <h3>${ev.eventName}（ID: ${eventId}）</h3>
-      <div>参加人数：${ev.participants.length}</div>
+      <h3>${eventName}（ID: ${eventId}）</h3>
+      <div>参加人数：${participants.length}</div>
     `;
 
-    ev.participants.forEach(p => {
+    participants.forEach(p => {
       card.innerHTML += `
         <div class="user-item">
           👤 ${p.userName}（${p.userId}）<br>
@@ -348,8 +365,8 @@ function downloadFile(filename, content) {
 
 /* ▼ 全ユーザー履歴 */
 function downloadAllCSV() {
-  const rows = [["userId","userName","eventId","eventName","timestamp"]];
-  allData.forEach(p => rows.push([p.userId, p.userName, p.eventId, p.eventName, p.timestamp]));
+  const rows = [["userId","userName","eventId","eventName","timestamp","stampMode"]];
+  allData.forEach(p => rows.push([p.userId, p.userName, p.eventId, p.eventName, p.timestamp, p.stampMode]));
   downloadFile("all_stamp_records.csv", toCSV(rows));
 }
 
@@ -364,7 +381,7 @@ function downloadBonusCSV() {
   });
 
   Object.keys(users).forEach(uid => {
-    const count = users[uid].length;
+    const count = users[uid].filter(r => r.stampMode === "on").length;
     const bonus = Math.floor(count / 5);
     if (bonus > 0) rows.push([uid, users[uid][0].userName, count, bonus]);
   });
