@@ -34,14 +34,38 @@
 
 <div class="container">
     <h2>MatchPoint スタンプ</h2>
-    <!-- 画面に現在の状態を表示するエリア -->
     <div id="status-message" class="status loading">スタンプを記録中...</div>
 </div>
+
+<!-- LIFF SDK -->
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <script>
 // 💡 デプロイしたGASのURL
 const apiUrl = "https://script.google.com/macros/s/AKfycbzbKAs5bd15Jw9qDHsFDy7l8aigwHPMPIOHfxtK8YiWsD8pg-TJzqk9abfrOmXr6Fir/exec"; 
 
+// 💡 LINEログインで userId を取得する
+async function initLiff() {
+    try {
+        await liff.init({
+            liffId: "ここにあなたのLIFF IDを入れる"  // ← 必ず差し替える
+        });
+
+        if (!liff.isLoggedIn()) {
+            liff.login();
+            return null;
+        }
+
+        const profile = await liff.getProfile();
+        return profile.userId;
+
+    } catch (err) {
+        console.error("LIFF初期化エラー:", err);
+        return null;
+    }
+}
+
+// 💡 GAS にスタンプを送信する
 async function sendStamp(userId, eventId) {
   const statusEl = document.getElementById("status-message");
   
@@ -61,11 +85,9 @@ async function sendStamp(userId, eventId) {
     console.log("GASからの返答:", resultText);
 
     if (resultText.includes("OK")) {
-        // 画面の表示を「成功」に変える
         statusEl.textContent = "スタンプが記録されました！";
         statusEl.className = "status success";
     } else {
-        // GAS側からエラーが返ってきた場合
         statusEl.textContent = "エラーが発生しました: " + resultText;
         statusEl.className = "status error";
     }
@@ -77,10 +99,24 @@ async function sendStamp(userId, eventId) {
   }
 }
 
-window.onload = () => {
+// 💡 ページ読み込み時の処理
+window.onload = async () => {
+  const statusEl = document.getElementById("status-message");
+
+  // URLパラメータから eventId を取得
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get("event") || "test";
-  const userId = "test-user"; // テスト用の仮ユーザーID
+
+  // LINEログインして userId を取得
+  const userId = await initLiff();
+
+  if (!userId) {
+    statusEl.textContent = "LINEログインが必要です。";
+    statusEl.className = "status error";
+    return;
+  }
+
+  // スタンプ送信
   sendStamp(userId, eventId);
 };
 </script>
