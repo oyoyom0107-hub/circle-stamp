@@ -37,7 +37,6 @@
 
     .icon {
       font-size: 60px;
-      color: #2ecc71;
       margin-bottom: 10px;
     }
 
@@ -56,6 +55,7 @@
 
     .loading { color: #f39c12; }
     .success { color: #2ecc71; }
+    .info { color: #3498db; }
     .error { color: #e74c3c; }
 
     .mypage-btn {
@@ -107,7 +107,7 @@ async function initLiff() {
   return profile;
 }
 
-async function sendStamp(profile, eventId, eventName) {
+async function sendStamp(profile, eventId, eventName, stampMode) {
   const statusEl = document.getElementById("status-message");
   const iconEl = document.getElementById("icon");
   const mypageBtn = document.getElementById("mypage-btn");
@@ -117,7 +117,8 @@ async function sendStamp(profile, eventId, eventName) {
     userName: profile.displayName,
     eventId: eventId,
     eventName: eventName,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    stampMode: stampMode   // ← 追加
   };
 
   try {
@@ -129,9 +130,16 @@ async function sendStamp(profile, eventId, eventName) {
     const resultText = await response.text();
 
     if (resultText.includes("OK")) {
-      iconEl.textContent = "✔️";
-      statusEl.textContent = "スタンプが記録されました！";
-      statusEl.className = "status success";
+
+      if (stampMode === "on") {
+        iconEl.textContent = "✔️";
+        statusEl.textContent = "スタンプが記録されました！";
+        statusEl.className = "status success";
+      } else {
+        iconEl.textContent = "ℹ️";
+        statusEl.textContent = "参加を記録しました（スタンプなし）";
+        statusEl.className = "status info";
+      }
 
       mypageBtn.style.display = "block";
 
@@ -157,11 +165,12 @@ window.onload = async () => {
 
   const eventId = urlParams.get("event") || "unknown";
   const eventName = urlParams.get("name") || "イベント名なし";
+  const stampMode = urlParams.get("stampMode") || "on";  // ← 追加
 
   const profile = await initLiff();
   if (!profile) return;
 
-  sendStamp(profile, eventId, eventName);
+  sendStamp(profile, eventId, eventName, stampMode);
 };
 </script>
 
