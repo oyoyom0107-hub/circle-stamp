@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device=device-width, initial-scale=1.0">
   <title>管理者ページ | MatchPoint</title>
 
   <style>
@@ -24,6 +24,19 @@
       margin-bottom: 10px;
       color: #2d3436;
       font-weight: bold;
+    }
+
+    .search-box {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .search-box input {
+      width: 90%;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
     .event-card {
@@ -68,7 +81,10 @@
 
 <h2>MatchPoint 管理者ページ</h2>
 
-<div id="admin-check"></div>
+<!-- ▼ 検索ボックス -->
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="イベント名・ユーザー名・userId で検索">
+</div>
 
 <div class="section-title">イベント別参加者一覧</div>
 <div id="events"></div>
@@ -84,12 +100,13 @@
 <script>
 const apiUrl = "https://script.google.com/macros/s/AKfycbxvrsDCZizsxMKFWt2Gd_nMBiNFgK5Tui3z-E1KN11Ic0QvDpOOEV-WHn8H0g58VfCM/exec";
 
-// ▼ 管理者の LINE userId を登録（複数可）
+// ▼ 管理者の LINE userId を登録
 const ADMIN_USERS = [
   "ここに雄也のLINEユーザーIDを入れる"
 ];
 
 let allData = []; // 全データ保持
+let events = {}; // イベントごとにグループ化したデータ
 
 /* ▼ 管理者チェック */
 async function checkAdmin() {
@@ -113,7 +130,6 @@ async function checkAdmin() {
     return;
   }
 
-  // ▼ 管理者ならデータ読み込み
   loadAllData();
 }
 
@@ -123,8 +139,7 @@ async function loadAllData() {
   allData = await response.json();
 
   // ▼ イベントごとにグループ化
-  const events = {};
-
+  events = {};
   allData.forEach(r => {
     if (!events[r.eventId]) {
       events[r.eventId] = {
@@ -135,10 +150,16 @@ async function loadAllData() {
     events[r.eventId].participants.push(r);
   });
 
-  const eventsEl = document.getElementById("events");
+  renderEvents(events);
+}
 
-  Object.keys(events).forEach(eventId => {
-    const ev = events[eventId];
+/* ▼ イベント一覧を描画 */
+function renderEvents(eventData) {
+  const eventsEl = document.getElementById("events");
+  eventsEl.innerHTML = "";
+
+  Object.keys(eventData).forEach(eventId => {
+    const ev = eventData[eventId];
 
     const card = document.createElement("div");
     card.className = "event-card";
@@ -168,6 +189,41 @@ async function loadAllData() {
     eventsEl.appendChild(card);
   });
 }
+
+/* ▼ 検索機能 */
+document.getElementById("searchInput").addEventListener("input", function() {
+  const keyword = this.value.toLowerCase();
+
+  const filtered = {};
+
+  Object.keys(events).forEach(eventId => {
+    const ev = events[eventId];
+
+    // ▼ イベント名・イベントIDが一致
+    if (
+      ev.eventName.toLowerCase().includes(keyword) ||
+      eventId.toLowerCase().includes(keyword)
+    ) {
+      filtered[eventId] = ev;
+      return;
+    }
+
+    // ▼ 参加者名・userId が一致
+    const matchedParticipants = ev.participants.filter(p =>
+      p.userName.toLowerCase().includes(keyword) ||
+      p.userId.toLowerCase().includes(keyword)
+    );
+
+    if (matchedParticipants.length > 0) {
+      filtered[eventId] = {
+        eventName: ev.eventName,
+        participants: matchedParticipants
+      };
+    }
+  });
+
+  renderEvents(filtered);
+});
 
 /* ▼ CSV生成 */
 function toCSV(rows) {
