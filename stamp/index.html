@@ -58,7 +58,6 @@
     .success { color: #2ecc71; }
     .error { color: #e74c3c; }
 
-    /* ▼ 追加：マイページボタン */
     .mypage-btn {
       margin-top: 20px;
       padding: 12px 20px;
@@ -71,7 +70,7 @@
       cursor: pointer;
       width: 100%;
       transition: 0.2s;
-      display: none; /* ← 初期は非表示 */
+      display: none;
     }
 
     .mypage-btn:hover {
@@ -86,7 +85,6 @@
   <div class="title">MatchPoint スタンプ</div>
   <div id="status-message" class="status loading">スタンプを記録中...</div>
 
-  <!-- ▼ 成功後に表示されるボタン -->
   <button id="mypage-btn" class="mypage-btn" onclick="goToMyPage()">
     マイページへ
   </button>
@@ -133,7 +131,6 @@ async function sendStamp(userId, eventId) {
       statusEl.textContent = "スタンプが記録されました！";
       statusEl.className = "status success";
 
-      // ▼ 成功後にボタンを表示
       mypageBtn.style.display = "block";
 
     } else {
