@@ -101,6 +101,22 @@
       opacity: 0.8;
       padding-bottom: 20px;
     }
+
+    /* QR生成UI */
+    .qr-input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .qr-result {
+      margin-top: 15px;
+      font-size: 16px;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
@@ -110,6 +126,27 @@
 </div>
 
 <div class="container">
+
+  <!-- ▼ QRコード生成UI -->
+  <div class="section-title">QRコード生成（stampMode 切り替え）</div>
+
+  <div class="event-card">
+    <label>イベントID（英数字）</label>
+    <input id="qr-event-id" class="qr-input" type="text" placeholder="例：bbq2026">
+
+    <label>イベント名</label>
+    <input id="qr-event-name" class="qr-input" type="text" placeholder="例：BBQ">
+
+    <label>モード選択</label>
+    <select id="qr-stamp-mode" class="qr-input">
+      <option value="on">スタンプ付与モード</option>
+      <option value="off">記録のみモード</option>
+    </select>
+
+    <div class="csv-btn" onclick="generateQRUrl()">QRコード用URLを生成</div>
+
+    <div id="qr-result" class="qr-result"></div>
+  </div>
 
   <!-- ▼ 検索ボックス -->
   <div class="search-box">
@@ -143,6 +180,29 @@ const ADMIN_USERS = [
 
 let allData = [];
 let events = {};
+
+/* ▼ QRコード生成ロジック */
+function generateQRUrl() {
+  const eventId = document.getElementById("qr-event-id").value.trim();
+  const eventName = document.getElementById("qr-event-name").value.trim();
+  const stampMode = document.getElementById("qr-stamp-mode").value;
+
+  if (!eventId || !eventName) {
+    document.getElementById("qr-result").innerHTML =
+      "<span style='color:red;'>イベントIDとイベント名を入力してください。</span>";
+    return;
+  }
+
+  const baseUrl = "https://oyoyom0107-hub.github.io/circle-stamp/stamp.html";
+
+  const qrUrl = `${baseUrl}?event=${encodeURIComponent(eventId)}&name=${encodeURIComponent(eventName)}&stampMode=${stampMode}`;
+
+  document.getElementById("qr-result").innerHTML = `
+    <strong>生成されたURL：</strong><br>
+    <span style="color:#0984e3;">${qrUrl}</span><br><br>
+    このURLをQRコード作成サイトに貼り付けてください。
+  `;
+}
 
 /* ▼ 管理者チェック */
 async function checkAdmin() {
