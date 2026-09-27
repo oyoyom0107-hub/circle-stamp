@@ -39,6 +39,28 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
+    /* ▼ スタンプカードUI */
+    .stamp-card {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stamp {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: #dfe6e9;
+      border: 2px solid #b2bec3;
+    }
+
+    .stamp.active {
+      background: #4a90e2;
+      border-color: #2d6ea3;
+    }
+
+    /* ▼ 特典表示 */
     .bonus {
       background: #ffeaa7;
       padding: 15px;
@@ -134,7 +156,20 @@ async function loadRecords(userId) {
 
   totalEl.textContent = `合計スタンプ数：${data.length}`;
 
-  // ▼ 特典表示（5個以上）
+  /* ▼ スタンプカードUI（5個分） */
+  const stampCardEl = document.createElement("div");
+  stampCardEl.className = "stamp-card";
+
+  for (let i = 0; i < 5; i++) {
+    const s = document.createElement("div");
+    s.className = "stamp";
+    if (i < data.length) s.classList.add("active");
+    stampCardEl.appendChild(s);
+  }
+
+  document.querySelector(".container").prepend(stampCardEl);
+
+  /* ▼ 特典表示（5個以上） */
   if (data.length >= 5) {
     const bonusEl = document.createElement("div");
     bonusEl.className = "bonus";
@@ -146,6 +181,7 @@ async function loadRecords(userId) {
     document.querySelector(".container").prepend(bonusEl);
   }
 
+  /* ▼ 履歴表示 */
   data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   recordsEl.innerHTML = data.map(r => `
