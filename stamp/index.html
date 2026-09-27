@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>Stamp Test</title>
-</head>
-<body>
-
-<script>
-const apiUrl = "https://script.google.com/macros/s/AKfycbwo2DbJn-NVfCQK8Xyi_9OiBNyXkiXpN05yauSheOWxoImy7pD5t_x1DQnD0cmI3xk1/exec";
+// 💡 【重要】ここに先ほどデプロイ画面でコピーした「新しいGASのURL」を貼り付けてください
+const apiUrl = "ここに新しいGASのURLを貼り付け"; 
 
 async function sendStamp(userId, eventId) {
   const payload = {
@@ -17,16 +9,16 @@ async function sendStamp(userId, eventId) {
   };
 
   try {
+    // 💡 mode: "no-cors" と headers を完全に削除しました
     const response = await fetch(apiUrl, {
       method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
       body: JSON.stringify(payload)
     });
 
-    console.log("送信完了（最新URLで送信）");
+    // 💡 GASから返ってきたエラーメッセージなどをブラウザのコンソールで読めるようにします
+    const resultText = await response.text();
+    console.log("GASからの返答:", resultText);
+
   } catch (error) {
     console.error("送信エラー:", error);
   }
@@ -38,7 +30,3 @@ window.onload = () => {
   const userId = "test-user";
   sendStamp(userId, eventId);
 };
-</script>
-
-</body>
-</html>
