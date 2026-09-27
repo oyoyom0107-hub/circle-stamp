@@ -45,6 +45,7 @@
       justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .stamp {
@@ -156,11 +157,12 @@ async function loadRecords(userId) {
 
   totalEl.textContent = `合計スタンプ数：${data.length}`;
 
-  /* ▼ スタンプカードUI（5個分） */
+  /* ▼ スタンプカードUI（最大20個） */
+  const maxStamp = 20;
   const stampCardEl = document.createElement("div");
   stampCardEl.className = "stamp-card";
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < maxStamp; i++) {
     const s = document.createElement("div");
     s.className = "stamp";
     if (i < data.length) s.classList.add("active");
@@ -169,14 +171,14 @@ async function loadRecords(userId) {
 
   document.querySelector(".container").prepend(stampCardEl);
 
-  /* ▼ 特典表示（5個以上） */
-  if (data.length >= 5) {
+  /* ▼ 特典表示（5の倍数で同じ特典） */
+  if (data.length > 0 && data.length % 5 === 0) {
     const bonusEl = document.createElement("div");
     bonusEl.className = "bonus";
     bonusEl.innerHTML = `
       🎉 <strong>特典ゲット！</strong><br>
-      スタンプが5個たまりました。<br>
-      次回の活動で「特典」を受け取れます。
+      スタンプが <strong>${data.length} 個</strong> たまりました！<br>
+      次回の活動で特典を受け取れます。
     `;
     document.querySelector(".container").prepend(bonusEl);
   }
