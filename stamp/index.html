@@ -1,7 +1,50 @@
-// 💡 【重要】ここに先ほどデプロイ画面でコピーした「新しいGASのURL」を貼り付けてください
-const apiUrl = "ここに新しいGASのURLを貼り付け"; 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サークルスタンプシステム</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            text-align: center;
+            padding: 50px 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .loading { color: #f39c12; }
+        .success { color: #2ecc71; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>MatchPoint スタンプ</h2>
+    <!-- 画面に現在の状態を表示するエリア -->
+    <div id="status-message" class="status loading">スタンプを記録中...</div>
+</div>
+
+<script>
+// 💡 デプロイしたGASのURL
+const apiUrl = "https://script.google.com/macros/s/AKfycbzbKAs5bd15Jw9qDHsFDy7l8aigwHPMPIOHfxtK8YiWsD8pg-TJzqk9abfrOmXr6Fir/exec"; 
 
 async function sendStamp(userId, eventId) {
+  const statusEl = document.getElementById("status-message");
+  
   const payload = {
     userId: userId,
     eventId: eventId,
@@ -9,24 +52,38 @@ async function sendStamp(userId, eventId) {
   };
 
   try {
-    // 💡 mode: "no-cors" と headers を完全に削除しました
     const response = await fetch(apiUrl, {
       method: "POST",
       body: JSON.stringify(payload)
     });
 
-    // 💡 GASから返ってきたエラーメッセージなどをブラウザのコンソールで読めるようにします
     const resultText = await response.text();
     console.log("GASからの返答:", resultText);
 
+    if (resultText.includes("OK")) {
+        // 画面の表示を「成功」に変える
+        statusEl.textContent = "スタンプが記録されました！";
+        statusEl.className = "status success";
+    } else {
+        // GAS側からエラーが返ってきた場合
+        statusEl.textContent = "エラーが発生しました: " + resultText;
+        statusEl.className = "status error";
+    }
+
   } catch (error) {
     console.error("送信エラー:", error);
+    statusEl.textContent = "通信エラーが発生しました。";
+    statusEl.className = "status error";
   }
 }
 
 window.onload = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get("event") || "test";
-  const userId = "test-user";
+  const userId = "test-user"; // テスト用の仮ユーザーID
   sendStamp(userId, eventId);
 };
+</script>
+
+</body>
+</html>
