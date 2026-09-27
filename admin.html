@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者ページ | MatchPoint</title>
+
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: #f1f2f6;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .user-card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .user-card h3 {
+      margin: 0 0 10px;
+      color: #0984e3;
+    }
+
+    .info {
+      font-size: 15px;
+      margin: 4px 0;
+    }
+
+    .bonus {
+      background: #ffeaa7;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      border-left: 6px solid #fdcb6e;
+    }
+  </style>
+</head>
+<body>
+
+<h2>MatchPoint 管理者ページ</h2>
+
+<div id="users"></div>
+
+<script>
+const apiUrl = "https://script.google.com/macros/s/AKfycbxvrsDCZizsxMKFWt2Gd_nMBiNFgK5Tui3z-E1KN11Ic0QvDpOOEV-WHn8H0g58VfCM/exec";
+
+async function loadAllData() {
+  const response = await fetch(apiUrl + "?all=true");
+  const data = await response.json();
+
+  // ▼ ユーザーごとにまとめる
+  const users = {};
+
+  data.forEach(r => {
+    if (!users[r.userId]) {
+      users[r.userId] = {
+        userName: r.userName,
+        stamps: [],
+      };
+    }
+    users[r.userId].stamps.push(r);
+  });
+
+  const usersEl = document.getElementById("users");
+
+  Object.keys(users).forEach(userId => {
+    const u = users[userId];
+    const stampCount = u.stamps.length;
+    const bonusCount = Math.floor(stampCount / 5);
+
+    const lastStamp = u.stamps.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))[0];
+
+    const card = document.createElement("div");
+    card.className = "user-card";
+
+    card.innerHTML = `
+      <h3>${u.userName}（${userId}）</h3>
+      <div class="info">スタンプ数：<strong>${stampCount}</strong></div>
+      <div class="info">特典獲得回数：<strong>${bonusCount}</strong></div>
+      <div class="info">最後の参加：${new Date(lastStamp.timestamp).toLocaleString()}</div>
+      <div class="info">最新イベント：${lastStamp.eventName}</div>
+    `;
+
+    if (bonusCount > 0) {
+      const bonusEl = document.createElement("div");
+      bonusEl.className = "bonus";
+      bonusEl.innerHTML = `
+        🎉 このユーザーは <strong>${bonusCount} 回</strong> 特典を獲得しています。
+      `;
+      card.appendChild(bonusEl);
+    }
+
+    usersEl.appendChild(card);
+  });
+}
+
+loadAllData();
+</script>
+
+</body>
+</html>
