@@ -104,17 +104,19 @@ async function initLiff() {
   }
 
   const profile = await liff.getProfile();
-  return profile.userId;
+  return profile;
 }
 
-async function sendStamp(userId, eventId) {
+async function sendStamp(profile, eventId, eventName) {
   const statusEl = document.getElementById("status-message");
   const iconEl = document.getElementById("icon");
   const mypageBtn = document.getElementById("mypage-btn");
 
   const payload = {
-    userId: userId,
+    userId: profile.userId,
+    userName: profile.displayName,
     eventId: eventId,
+    eventName: eventName,
     timestamp: new Date().toISOString()
   };
 
@@ -152,12 +154,14 @@ function goToMyPage() {
 
 window.onload = async () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const eventId = urlParams.get("event") || "test";
 
-  const userId = await initLiff();
-  if (!userId) return;
+  const eventId = urlParams.get("event") || "unknown";
+  const eventName = urlParams.get("name") || "イベント名なし";
 
-  sendStamp(userId, eventId);
+  const profile = await initLiff();
+  if (!profile) return;
+
+  sendStamp(profile, eventId, eventName);
 };
 </script>
 
