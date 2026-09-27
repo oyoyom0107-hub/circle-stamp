@@ -184,7 +184,7 @@
 
 <script>
 const apiUrl = "https://script.google.com/macros/s/AKfycbzoVQlPH6OWKKm58Bz2ImnNQJVvf6aU8-_enPXRMdeSTWgwK0md6nkTBr1YRVn0sNJ_/exec";
-const ADMIN_USERS = ["Ufd3804099d8769a03dd3b68e70b05b35"];
+const ADMIN_USERS = ["Ufd3804099d8769a03dd3b68e70b05b35"];  // ← ここは後でコンソールの結果で更新する
 
 let allData = [];
 let eventSettings = [];
@@ -294,6 +294,10 @@ async function checkAdmin() {
   }
 
   const profile = await liff.getProfile();
+
+  /* ▼ 追加：あなたの userId をコンソールに表示 */
+  console.log("Your userId:", profile.userId);
+
   if (!ADMIN_USERS.includes(profile.userId)) {
     document.body.innerHTML = "<h2 style='color:white;text-align:center;'>アクセス権がありません</h2>";
     return;
