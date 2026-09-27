@@ -1,52 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Stamp</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body>
-  <h2>スタンプ処理中...</h2>
+const apiUrl = "https://script.google.com/macros/s/AKfycbxOEW9y_59_ckap4phG9WxnS9b6lEmTPsJyQ5ueyd-p_CMVST-qJkkF_1tmNXlIbrQ/exec";
 
-  <script>
-    const liffId = "2011752461-qIktF1m8";  
-   const apiUrl = "https://script.google.com/macros/s/AKfycbxmWMamJbyyb0b_RYzg-Z1Rliare3M8nDMJWHOUIIfBxV8zowoeFPB_7SNNWNZ5ilo/exec";
-
-    async function main() {
-      await liff.init({ liffId });
-
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
-
-      const params = new URLSearchParams(window.location.search);
-      const eventId = params.get("event") || "default";
-
-     await fetch(apiUrl, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    userId,
-    eventId,
+async function sendStamp(userId, eventId) {
+  const payload = {
+    userId: userId,
+    eventId: eventId,
     timestamp: new Date().toISOString()
-  })
-});
+  };
 
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
 
-      document.body.innerHTML = `
-        <h2>スタンプを記録しました！</h2>
-        <p>ユーザーID: ${userId}</p>
-        <p>イベント: ${eventId}</p>
-      `;
-    }
-
-    main();
-  </script>
-</body>
-</html>
+    console.log("送信完了（あなたの指定したURL）");
+  } catch (error) {
+    console.error("送信エラー:", error);
+  }
+}
