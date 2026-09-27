@@ -57,6 +57,26 @@
     .loading { color: #f39c12; }
     .success { color: #2ecc71; }
     .error { color: #e74c3c; }
+
+    /* ▼ 追加：マイページボタン */
+    .mypage-btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+      display: none; /* ← 初期は非表示 */
+    }
+
+    .mypage-btn:hover {
+      background: #357ABD;
+    }
   </style>
 </head>
 <body>
@@ -65,6 +85,11 @@
   <div id="icon" class="icon">⏳</div>
   <div class="title">MatchPoint スタンプ</div>
   <div id="status-message" class="status loading">スタンプを記録中...</div>
+
+  <!-- ▼ 成功後に表示されるボタン -->
+  <button id="mypage-btn" class="mypage-btn" onclick="goToMyPage()">
+    マイページへ
+  </button>
 </div>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -87,6 +112,7 @@ async function initLiff() {
 async function sendStamp(userId, eventId) {
   const statusEl = document.getElementById("status-message");
   const iconEl = document.getElementById("icon");
+  const mypageBtn = document.getElementById("mypage-btn");
 
   const payload = {
     userId: userId,
@@ -106,6 +132,10 @@ async function sendStamp(userId, eventId) {
       iconEl.textContent = "✔️";
       statusEl.textContent = "スタンプが記録されました！";
       statusEl.className = "status success";
+
+      // ▼ 成功後にボタンを表示
+      mypageBtn.style.display = "block";
+
     } else {
       iconEl.textContent = "⚠️";
       statusEl.textContent = "エラーが発生しました: " + resultText;
@@ -117,6 +147,10 @@ async function sendStamp(userId, eventId) {
     statusEl.textContent = "通信エラーが発生しました。";
     statusEl.className = "status error";
   }
+}
+
+function goToMyPage() {
+  window.location.href = "https://oyoyom0107-hub.github.io/circle-stamp/mypage.html";
 }
 
 window.onload = async () => {
