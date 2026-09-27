@@ -18,7 +18,15 @@
       color: #2c3e50;
     }
 
-    .user-card {
+    .section-title {
+      font-size: 22px;
+      margin-top: 40px;
+      margin-bottom: 10px;
+      color: #2d3436;
+      font-weight: bold;
+    }
+
+    .event-card {
       background: white;
       padding: 20px;
       margin-bottom: 15px;
@@ -26,22 +34,23 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    .user-card h3 {
+    .event-card h3 {
       margin: 0 0 10px;
       color: #0984e3;
+    }
+
+    .user-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .user-item:last-child {
+      border-bottom: none;
     }
 
     .info {
       font-size: 15px;
       margin: 4px 0;
-    }
-
-    .bonus {
-      background: #ffeaa7;
-      padding: 10px;
-      border-radius: 8px;
-      margin-top: 10px;
-      border-left: 6px solid #fdcb6e;
     }
   </style>
 </head>
@@ -49,58 +58,53 @@
 
 <h2>MatchPoint 管理者ページ</h2>
 
-<div id="users"></div>
+<div class="section-title">イベント別参加者一覧</div>
+<div id="events"></div>
 
 <script>
-const apiUrl = "https://script.google.com/macros/s/AKfycbxlMfcvfDPOmsZew6W63YdvzD7kxxcs_b9L5aqJxd3TNw8Xy1-5jvKA4iZlzsdNvxaE/exec";
+const apiUrl = "https://script.google.com/macros/s/AKfycbxvrsDCZizsxMKFWt2Gd_nMBiNFgK5Tui3z-E1KN11Ic0QvDpOOEV-WHn8H0g58VfCM/exec";
 
 async function loadAllData() {
   const response = await fetch(apiUrl + "?all=true");
   const data = await response.json();
 
-  // ▼ ユーザーごとにまとめる
-  const users = {};
+  // ▼ イベントごとにグループ化
+  const events = {};
 
   data.forEach(r => {
-    if (!users[r.userId]) {
-      users[r.userId] = {
-        userName: r.userName,
-        stamps: [],
+    if (!events[r.eventId]) {
+      events[r.eventId] = {
+        eventName: r.eventName,
+        participants: []
       };
     }
-    users[r.userId].stamps.push(r);
+    events[r.eventId].participants.push(r);
   });
 
-  const usersEl = document.getElementById("users");
+  const eventsEl = document.getElementById("events");
 
-  Object.keys(users).forEach(userId => {
-    const u = users[userId];
-    const stampCount = u.stamps.length;
-    const bonusCount = Math.floor(stampCount / 5);
-
-    const lastStamp = u.stamps.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))[0];
+  Object.keys(events).forEach(eventId => {
+    const ev = events[eventId];
 
     const card = document.createElement("div");
-    card.className = "user-card";
+    card.className = "event-card";
 
     card.innerHTML = `
-      <h3>${u.userName}（${userId}）</h3>
-      <div class="info">スタンプ数：<strong>${stampCount}</strong></div>
-      <div class="info">特典獲得回数：<strong>${bonusCount}</strong></div>
-      <div class="info">最後の参加：${new Date(lastStamp.timestamp).toLocaleString()}</div>
-      <div class="info">最新イベント：${lastStamp.eventName}</div>
+      <h3>${ev.eventName}（ID: ${eventId}）</h3>
+      <div class="info">参加人数：<strong>${ev.participants.length}</strong></div>
     `;
 
-    if (bonusCount > 0) {
-      const bonusEl = document.createElement("div");
-      bonusEl.className = "bonus";
-      bonusEl.innerHTML = `
-        🎉 このユーザーは <strong>${bonusCount} 回</strong> 特典を獲得しています。
+    ev.participants.forEach(p => {
+      const item = document.createElement("div");
+      item.className = "user-item";
+      item.innerHTML = `
+        👤 ${p.userName}（${p.userId}）<br>
+        ⏰ ${new Date(p.timestamp).toLocaleString()}
       `;
-      card.appendChild(bonusEl);
-    }
+      card.appendChild(item);
+    });
 
-    usersEl.appendChild(card);
+    eventsEl.appendChild(card);
   });
 }
 
