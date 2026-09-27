@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スタンプ履歴 | MatchPoint</title>
+
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #4a90e2, #50c9c3);
+      padding: 0;
+      margin: 0;
+      color: #333;
+    }
+
+    .header {
+      background: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .total {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .record {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 6px solid #4a90e2;
+      transition: transform 0.15s ease;
+    }
+
+    .record:hover {
+      transform: translateY(-3px);
+    }
+
+    .event {
+      font-size: 18px;
+      font-weight: bold;
+      color: #34495e;
+    }
+
+    .time {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin-top: 5px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: white;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h2>MatchPoint スタンプ履歴</h2>
+</div>
+
+<div class="container">
+  <div id="total" class="total">読み込み中...</div>
+  <div id="records"></div>
+</div>
+
+<div class="footer">
+  © MatchPoint Circle Stamp System
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<script>
+const apiUrl = "https://script.google.com/macros/s/AKfycbzbKAs5bd15Jw9qDHsFDy7l8aigwHPMPIOHfxtK8YiWsD8pg-TJzqk9abfrOmXr6Fir/exec";
+
+async function initLiff() {
+  await liff.init({ liffId: "2011752461-qIktF1m8" });
+
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return null;
+  }
+
+  const profile = await liff.getProfile();
+  return profile.userId;
+}
+
+async function loadRecords(userId) {
+  const response = await fetch(`${apiUrl}?userId=${userId}`);
+  const data = await response.json();
+
+  const totalEl = document.getElementById("total");
+  const recordsEl = document.getElementById("records");
+
+  totalEl.textContent = `合計スタンプ数：${data.length}`;
+
+  // 新しい順に並び替え
+  data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  recordsEl.innerHTML = data.map(r => `
+    <div class="record">
+      <div class="event">活動ID：${r.eventId}</div>
+      <div class="time">${r.timestamp}</div>
+    </div>
+  `).join("");
+}
+
+window.onload = async () => {
+  const userId = await initLiff();
+  if (!userId) return;
+
+  loadRecords(userId);
+};
+</script>
+
+</body>
+</html>
