@@ -113,11 +113,6 @@ async function initLiff() {
   return profile.userId;
 }
 
-
-  const profile = await liff.getProfile();
-  return profile.userId;
-}
-
 async function loadRecords(userId) {
   const response = await fetch(`${apiUrl}?userId=${userId}`);
   const data = await response.json();
