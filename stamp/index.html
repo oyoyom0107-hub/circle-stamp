@@ -1,4 +1,13 @@
-const apiUrl = "https://script.google.com/macros/s/AKfycbxOEW9y_59_ckap4phG9WxnS9b6lEmTPsJyQ5ueyd-p_CMVST-qJkkF_1tmNXlIbrQ/exec";
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Stamp Test</title>
+</head>
+<body>
+
+<script>
+const apiUrl = "https://script.google.com/macros/s/AKfycbwo2DbJn-NVfCQK8Xyi_9OiBNyXkiXpN05yauSheOWxoImy7pD5t_x1DQnD0cmI3xk1/exec";
 
 async function sendStamp(userId, eventId) {
   const payload = {
@@ -17,8 +26,19 @@ async function sendStamp(userId, eventId) {
       body: JSON.stringify(payload)
     });
 
-    console.log("送信完了（あなたの指定したURL）");
+    console.log("送信完了（最新URLで送信）");
   } catch (error) {
     console.error("送信エラー:", error);
   }
 }
+
+window.onload = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = urlParams.get("event") || "test";
+  const userId = "test-user";
+  sendStamp(userId, eventId);
+};
+</script>
+
+</body>
+</html>
