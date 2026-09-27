@@ -68,6 +68,8 @@
 
 <h2>MatchPoint 管理者ページ</h2>
 
+<div id="admin-check"></div>
+
 <div class="section-title">イベント別参加者一覧</div>
 <div id="events"></div>
 
@@ -77,11 +79,45 @@
 <div class="section-title">特典獲得者一覧 CSV</div>
 <div class="csv-btn" onclick="downloadBonusCSV()">特典獲得者一覧をダウンロード</div>
 
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
 <script>
 const apiUrl = "https://script.google.com/macros/s/AKfycbxvrsDCZizsxMKFWt2Gd_nMBiNFgK5Tui3z-E1KN11Ic0QvDpOOEV-WHn8H0g58VfCM/exec";
 
-let allData = []; // 全データを保持
+// ▼ 管理者の LINE userId を登録（複数可）
+const ADMIN_USERS = [
+  "ここに雄也のLINEユーザーIDを入れる"
+];
 
+let allData = []; // 全データ保持
+
+/* ▼ 管理者チェック */
+async function checkAdmin() {
+  await liff.init({ liffId: "2011752461-qIktF1m8" });
+
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
+
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+
+  if (!ADMIN_USERS.includes(userId)) {
+    document.body.innerHTML = `
+      <div style="padding:40px; text-align:center; font-size:20px;">
+        🚫 <strong>アクセス権がありません</strong><br><br>
+        このページは管理者専用です。
+      </div>
+    `;
+    return;
+  }
+
+  // ▼ 管理者ならデータ読み込み
+  loadAllData();
+}
+
+/* ▼ 全データ読み込み */
 async function loadAllData() {
   const response = await fetch(apiUrl + "?all=true");
   allData = await response.json();
@@ -133,12 +169,12 @@ async function loadAllData() {
   });
 }
 
-/* ▼ CSV生成関数 */
+/* ▼ CSV生成 */
 function toCSV(rows) {
   return rows.map(r => r.join(",")).join("\n");
 }
 
-/* ▼ ファイルとしてダウンロード */
+/* ▼ ダウンロード */
 function downloadFile(filename, content) {
   const blob = new Blob([content], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
@@ -199,7 +235,8 @@ function downloadBonusCSV() {
   downloadFile(`bonus_users.csv`, toCSV(rows));
 }
 
-loadAllData();
+/* ▼ 管理者チェック開始 */
+checkAdmin();
 </script>
 
 </body>
