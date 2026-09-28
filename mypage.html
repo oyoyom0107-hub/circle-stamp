@@ -98,7 +98,7 @@ scanButton.addEventListener('click',async()=>{
         const month=formatMonth(r.timestamp);
         const heading=month===previousMonth?'':`<h3 class="month">${escapeHtml(month)}</h3>`;
         previousMonth=month;
-        return `${heading}<div class="record"><div><strong>${escapeHtml(r.eventName||'イベント')}</strong><div class="muted">${escapeHtml(formatDate(r.timestamp))}</div></div><span class="tag ${r.stampMode==='on'?'':'off'}">${r.stampMode==='on'?'+1 スタンプ':'参加のみ'}</span></div>`;
+        return `${heading}<div class="record"><div><strong>${escapeHtml(r.eventName||'イベント')}</strong><div class="muted">${escapeHtml(formatDate(r.timestamp))}</div></div><span class="tag ${r.revoked||r.stampMode!=='on'?'off':''}">${r.revoked?'訂正済み':r.stampMode==='on'?'+1 スタンプ':'参加のみ'}</span></div>`;
       }).join('')
       :'まだ参加履歴がありません。';
     const redemptions=[...(data.redemptions||[])].sort((a,b)=>new Date(b.redeemedAt)-new Date(a.redeemedAt));
