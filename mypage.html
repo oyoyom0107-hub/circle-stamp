@@ -20,6 +20,10 @@
     .scan-button{width:100%;padding:15px;border:0;border-radius:12px;background:#168b77;color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer}
     .scan-button:disabled{background:#a8bdbc;cursor:not-allowed}
     #scan-status{min-height:1.4em;margin-bottom:0}
+    .refresh-button{width:100%;padding:12px;border:1px solid #168b77;border-radius:12px;background:#fff;color:#087763;font:inherit;font-weight:700;cursor:pointer}
+    .refresh-button:disabled{opacity:.55;cursor:not-allowed}
+    #refresh-status{min-height:1.4em;margin:8px 0 0}
+    .monthly-item{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid #e5eeee}
   </style>
 </head>
 <body>
@@ -29,7 +33,12 @@
     <button type="button" id="scan-button" class="scan-button" disabled>📷 活動のQRコードを読み取る</button>
     <p id="scan-status" class="muted" role="status">読み取り機能を確認中...</p>
   </section>
+  <section class="card">
+    <button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button>
+    <p id="refresh-status" class="muted" role="status">読み込み中...</p>
+  </section>
   <section class="card" id="summary">読み込み中...</section>
+  <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加や、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
   <section class="card"><h2>参加履歴</h2><div id="records"></div></section>
   <section class="card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
 </main>
@@ -40,6 +49,8 @@ const LIFF_ID='2011752461-qIktF1m8';
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const scanButton=document.getElementById('scan-button');
 const scanStatus=document.getElementById('scan-status');
+const refreshButton=document.getElementById('refresh-button');
+const refreshStatus=document.getElementById('refresh-status');
 const formatDate=v=>new Date(v).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
 const formatMonth=v=>new Date(v).toLocaleDateString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'long'});
 
@@ -71,27 +82,19 @@ scanButton.addEventListener('click',async()=>{
   }
 });
 
-(async()=>{
-  const summary=document.getElementById('summary');
-  try{
-    await liff.init({liffId:LIFF_ID});
-    if(!liff.isLoggedIn()){liff.login();return}
-    if(liff.isApiAvailable('scanCodeV2')){
-      scanButton.disabled=false;
-      scanStatus.textContent='活動会場のQRコードにカメラを向けてください。';
-    }else{
-      scanStatus.textContent='この環境では読み取れません。LINE Developersの「Scan QR」とLIFF画面サイズ「Full」を確認してください。';
-    }
-    const accessToken=liff.getAccessToken();
-    if(!accessToken)throw Error('LINEから開き直してください。');
-    const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'mypage',accessToken})});
-    const data=await response.json();
-    if(!data.ok)throw Error(data.message||'読み込めませんでした。');
+function renderMyPage(data){
+    const summary=document.getElementById('summary');
+    summary.classList.remove('error');
+    const history=[...(data.records||[])].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+    const monthly=new Map();
+    history.forEach(r=>{const month=formatMonth(r.timestamp);monthly.set(month,(monthly.get(month)||0)+1)});
+    document.getElementById('monthly-counts').innerHTML=monthly.size
+      ?[...monthly].map(([month,count])=>`<div class="monthly-item"><span>${escapeHtml(month)}</span><strong>${count}回</strong></div>`).join('')
+      :'まだ参加履歴がありません。';
     const count=data.stampCount;
     const rem=count%5;
     const toNext=5-rem;
     summary.innerHTML=`<div class="big">合計スタンプ：${count}個</div><div class="stamps">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}">${i<rem?'●':'○'}</span>`).join('')}</div><p>${rem===0&&count>0?'🎉 5回の参加で特典を獲得しました！':`あと${toNext}回で次の特典！`}</p><p>🎁 利用可能な特典：<strong>${data.availableBonus}個</strong></p><p class="muted">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p>特典を受け取る際はスタッフにお声がけください。</p>':''}`;
-    const history=[...data.records].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
     let previousMonth='';
     document.getElementById('records').innerHTML=history.length
       ?history.map(r=>{
@@ -105,9 +108,48 @@ scanButton.addEventListener('click',async()=>{
     document.getElementById('redemptions').innerHTML=redemptions.length
       ?redemptions.map(r=>`<div class="record"><div><strong>🎁 特典を使用</strong><div class="muted">${escapeHtml(formatDate(r.redeemedAt))}</div></div><span class="tag off">使用済み</span></div>`).join('')
       :'まだ特典を使用していません。';
+}
+
+let loadedOnce=false;
+async function loadMyPage(){
+  if(refreshButton.disabled&&loadedOnce)return;
+  refreshButton.disabled=true;
+  refreshStatus.className='muted';
+  refreshStatus.textContent='最新の記録を確認しています...';
+  try{
+    const accessToken=liff.getAccessToken();
+    if(!accessToken)throw Error('LINEから開き直してください。');
+    const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'mypage',accessToken})});
+    if(!response.ok)throw Error('通信エラーが発生しました。');
+    const data=await response.json();
+    if(!data.ok)throw Error(data.message||'読み込めませんでした。');
+    renderMyPage(data);
+    loadedOnce=true;
+    refreshStatus.textContent='最新の記録に更新しました。';
   }catch(error){
-    summary.classList.add('error');
-    summary.textContent=error.message||'通信エラーが発生しました。';
+    refreshStatus.className='error';
+    refreshStatus.textContent=error.message||'通信エラーが発生しました。';
+    if(!loadedOnce){const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent}
+  }finally{
+    refreshButton.disabled=false;
+  }
+}
+refreshButton.addEventListener('click',loadMyPage);
+(async()=>{
+  try{
+    await liff.init({liffId:LIFF_ID});
+    if(!liff.isLoggedIn()){liff.login();return}
+    if(liff.isApiAvailable('scanCodeV2')){
+      scanButton.disabled=false;
+      scanStatus.textContent='活動会場のQRコードにカメラを向けてください。';
+    }else{
+      scanStatus.textContent='この環境では読み取れません。LINE Developersの「Scan QR」とLIFF画面サイズ「Full」を確認してください。';
+    }
+    await loadMyPage();
+  }catch(error){
+    refreshStatus.className='error';
+    refreshStatus.textContent=error.message||'LINEの初期化に失敗しました。';
+    const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent;
   }
 })();
 </script>
