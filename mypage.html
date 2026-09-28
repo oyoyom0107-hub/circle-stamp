@@ -138,7 +138,7 @@ refreshButton.addEventListener('click',loadMyPage);
 (async()=>{
   try{
     await liff.init({liffId:LIFF_ID});
-    if(!liff.isLoggedIn()){liff.login();return}
+    if(!liff.isLoggedIn()){liff.login({redirectUri:new URL('mypage.html',location.href).href});return}
     if(liff.isApiAvailable('scanCodeV2')){
       scanButton.disabled=false;
       scanStatus.textContent='活動会場のQRコードにカメラを向けてください。';
