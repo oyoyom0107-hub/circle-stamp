@@ -1,7 +1,115 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>スタンプカード | MatchPoint</title><style>
-:root{font-family:system-ui,sans-serif;color:#17324c}body{margin:0;background:#eef8f7}.header{background:#168b77;color:#fff;text-align:center;padding:22px}main{max-width:680px;margin:20px auto;padding:0 16px}.card{background:#fff;padding:20px;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 18px #17324c12}.stamps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:20px 0}.stamp{width:42px;height:42px;border-radius:50%;border:2px solid #168b77;display:grid;place-items:center;color:#168b77;font-size:24px}.stamp.on{background:#168b77;color:#fff}.big{font-size:22px;font-weight:700}.record{padding:12px 0;border-top:1px solid #e5eeee}.muted{color:#577080;font-size:14px}.error{color:#b13232}
-</style></head><body><header class="header"><h1>MatchPoint スタンプカード</h1></header><main><section class="card" id="summary">読み込み中...</section><section class="card"><h2>参加履歴</h2><div id="records"></div></section></main><script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script><script>
-const API='https://script.google.com/macros/s/AKfycbw-gxI5JurV-bRswZv1BGcWC2r7tkyK2XbeVBBy6BTysyTpxYpw5_3ENr3Y5etClIIS/exec';const LIFF_ID='2011752461-qIktF1m8';
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>スタンプカード | MatchPoint</title>
+  <style>
+    :root{font-family:system-ui,sans-serif;color:#17324c}
+    body{margin:0;background:#eef8f7}
+    .header{background:#168b77;color:#fff;text-align:center;padding:22px}
+    main{max-width:680px;margin:20px auto;padding:0 16px}
+    .card{background:#fff;padding:20px;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 18px #17324c12}
+    .stamps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:20px 0}
+    .stamp{width:42px;height:42px;border-radius:50%;border:2px solid #168b77;display:grid;place-items:center;color:#168b77;font-size:24px}
+    .stamp.on{background:#168b77;color:#fff}
+    .big{font-size:22px;font-weight:700}
+    .record{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:13px 0;border-top:1px solid #e5eeee}.record strong{overflow-wrap:anywhere}.month{margin:22px 0 8px;color:#168b77}.tag{white-space:nowrap;padding:4px 8px;border-radius:8px;background:#e6f5f0;color:#087763;font-size:13px}.tag.off{background:#edf1f3;color:#536977}
+    .muted{color:#577080;font-size:14px}
+    .error{color:#b13232}
+    .scan-button{width:100%;padding:15px;border:0;border-radius:12px;background:#168b77;color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer}
+    .scan-button:disabled{background:#a8bdbc;cursor:not-allowed}
+    #scan-status{min-height:1.4em;margin-bottom:0}
+  </style>
+</head>
+<body>
+<header class="header"><h1>MatchPoint スタンプカード</h1></header>
+<main>
+  <section class="card">
+    <button type="button" id="scan-button" class="scan-button" disabled>📷 活動のQRコードを読み取る</button>
+    <p id="scan-status" class="muted" role="status">読み取り機能を確認中...</p>
+  </section>
+  <section class="card" id="summary">読み込み中...</section>
+  <section class="card"><h2>参加履歴</h2><div id="records"></div></section>
+  <section class="card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
+</main>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const API='https://script.google.com/macros/s/AKfycbxTYedx5VBpe5BPyIsQx0iNwS_3xZ3EaWfQDDyOGSQhP3TK6J0F-VWRfYvTjaOATawn/exec';
+const LIFF_ID='2011752461-qIktF1m8';
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-(async()=>{const summary=document.getElementById('summary');try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login();return}const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINEから開き直してください。');const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'mypage',accessToken})});const data=await response.json();if(!data.ok)throw Error(data.message||'読み込めませんでした。');const count=data.stampCount;const rem=count%5;const toNext=5-rem;summary.innerHTML=`<div class="big">合計スタンプ：${count}個</div><div class="stamps">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}">${i<rem?'●':'○'}</span>`).join('')}</div><p>${rem===0&&count>0?'🎉 5回の参加で特典を獲得しました！':`あと${toNext}回で次の特典！`}</p><p>🎁 利用可能な特典：<strong>${data.availableBonus}個</strong></p><p class="muted">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p>特典を受け取る際はスタッフにお声がけください。</p>':''}`;document.getElementById('records').innerHTML=data.records.length?data.records.map(r=>`<div class="record"><strong>${escapeHtml(r.eventName)}</strong> ${r.stampMode==='on'?'+1 スタンプ':'参加記録のみ'}<div class="muted">${escapeHtml(new Date(r.timestamp).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'}))}</div></div>`).join(''):'まだ参加履歴がありません。'}catch(e){summary.className+=' error';summary.textContent=e.message||'通信エラーが発生しました。'}})();
-</script></body></html>
+const scanButton=document.getElementById('scan-button');
+const scanStatus=document.getElementById('scan-status');
+const formatDate=v=>new Date(v).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const formatMonth=v=>new Date(v).toLocaleDateString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'long'});
+
+scanButton.addEventListener('click',async()=>{
+  scanButton.disabled=true;
+  scanStatus.className='muted';
+  scanStatus.textContent='カメラを起動しています...';
+  try{
+    const result=await liff.scanCodeV2();
+    if(!result || !result.value){
+      scanStatus.textContent='読み取りがキャンセルされました。';
+      return;
+    }
+    const scanned=new URL(result.value);
+    const expected=new URL('stamp/index.html',location.href);
+    if(scanned.origin!==expected.origin || scanned.pathname!==expected.pathname ||
+       !scanned.searchParams.get('event') || !scanned.searchParams.get('code')){
+      throw Error('このサークルの参加用QRコードを読み取ってください。');
+    }
+    // 既存の取得画面が、QRの期限・イベント・重複取得をサーバーへ照会する。
+    location.assign(scanned.href);
+  }catch(error){
+    scanStatus.className='error';
+    scanStatus.textContent=error instanceof TypeError
+      ? 'QRコードの内容を読み取れませんでした。'
+      : (error.message||'カメラを起動できませんでした。権限設定をご確認ください。');
+  }finally{
+    scanButton.disabled=false;
+  }
+});
+
+(async()=>{
+  const summary=document.getElementById('summary');
+  try{
+    await liff.init({liffId:LIFF_ID});
+    if(!liff.isLoggedIn()){liff.login();return}
+    if(liff.isApiAvailable('scanCodeV2')){
+      scanButton.disabled=false;
+      scanStatus.textContent='活動会場のQRコードにカメラを向けてください。';
+    }else{
+      scanStatus.textContent='この環境では読み取れません。LINE Developersの「Scan QR」とLIFF画面サイズ「Full」を確認してください。';
+    }
+    const accessToken=liff.getAccessToken();
+    if(!accessToken)throw Error('LINEから開き直してください。');
+    const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'mypage',accessToken})});
+    const data=await response.json();
+    if(!data.ok)throw Error(data.message||'読み込めませんでした。');
+    const count=data.stampCount;
+    const rem=count%5;
+    const toNext=5-rem;
+    summary.innerHTML=`<div class="big">合計スタンプ：${count}個</div><div class="stamps">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}">${i<rem?'●':'○'}</span>`).join('')}</div><p>${rem===0&&count>0?'🎉 5回の参加で特典を獲得しました！':`あと${toNext}回で次の特典！`}</p><p>🎁 利用可能な特典：<strong>${data.availableBonus}個</strong></p><p class="muted">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p>特典を受け取る際はスタッフにお声がけください。</p>':''}`;
+    const history=[...data.records].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+    let previousMonth='';
+    document.getElementById('records').innerHTML=history.length
+      ?history.map(r=>{
+        const month=formatMonth(r.timestamp);
+        const heading=month===previousMonth?'':`<h3 class="month">${escapeHtml(month)}</h3>`;
+        previousMonth=month;
+        return `${heading}<div class="record"><div><strong>${escapeHtml(r.eventName||'イベント')}</strong><div class="muted">${escapeHtml(formatDate(r.timestamp))}</div></div><span class="tag ${r.stampMode==='on'?'':'off'}">${r.stampMode==='on'?'+1 スタンプ':'参加のみ'}</span></div>`;
+      }).join('')
+      :'まだ参加履歴がありません。';
+    const redemptions=[...(data.redemptions||[])].sort((a,b)=>new Date(b.redeemedAt)-new Date(a.redeemedAt));
+    document.getElementById('redemptions').innerHTML=redemptions.length
+      ?redemptions.map(r=>`<div class="record"><div><strong>🎁 特典を使用</strong><div class="muted">${escapeHtml(formatDate(r.redeemedAt))}</div></div><span class="tag off">使用済み</span></div>`).join('')
+      :'まだ特典を使用していません。';
+  }catch(error){
+    summary.classList.add('error');
+    summary.textContent=error.message||'通信エラーが発生しました。';
+  }
+})();
+</script>
+</body>
+</html>
