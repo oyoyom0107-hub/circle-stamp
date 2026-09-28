@@ -13,6 +13,12 @@
 <section class="box" id="live"><h2>受付中のイベント</h2><button id="refreshLive" type="button">参加人数を更新</button><p class="muted">残り時間は画面上で更新します。参加人数は「参加人数を更新」で再取得します。</p><div id="liveList"></div></section>
 <section class="box" id="events"><h2>イベント管理</h2>
 <h3>登録済みの活動名</h3><div id="activityList"></div>
+<h3>活動の種類を登録</h3>
+<label>活動名<input id="activityName" placeholder="例：バドミントン" maxlength="80" autocomplete="off"></label>
+<label>イベントIDに使うローマ字コード<input id="activityCode" placeholder="例：badominntonn" maxlength="32" pattern="[a-z]{2,32}" autocapitalize="off"></label>
+<button id="addActivity" type="button">活動名だけを登録</button>
+<p class="muted help">イベントやQRは作成されません。イベントIDはこのコードと開催日の組み合わせです。</p>
+<button id="seedActivities" type="button" hidden>バドミントン・サークルTシャツ集金・BBQ・大会を登録</button>
 <h3>本日のイベントを作成</h3>
 <label>登録済みの名前を選ぶ<select id="activityChoices"><option value="">新しいイベント名を入力</option></select></label>
 <label>イベント名<input id="eventActivityName" list="activityOptions" placeholder="例：バドミントン" autocomplete="off" maxlength="80"><datalist id="activityOptions"></datalist></label>
@@ -47,13 +53,14 @@ const API='https://script.google.com/macros/s/AKfycbxTYedx5VBpe5BPyIsQx0iNwS_3xZ
 const LIFF_ID='2011752461-qIktF1m8',STAMP_URL=new URL('stamp/index.html',location.href).href;
 let editEventId=null;
 let state={operationAudit:[],activityTypes:[],events:[],records:[],redemptions:[],users:[],corrections:[],eventStats:[],adminUsers:[],adminAudit:[],stats:{}};
+let attendeeCounts=new Map();
 const el=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const status=(s,error=false)=>{el('status').textContent=s;el('status').className=error?'error':''};
 const date=v=>{const d=new Date(v);return isNaN(d)?String(v||''):d.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})};
 const day=v=>new Date(v).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 async function api(type,fields={}){const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINE認証が必要です。');const response=await fetch(API,{method:'POST',body:JSON.stringify({type,accessToken,...fields})});const data=await response.json();if(!data.ok)throw Error(data.message||'処理に失敗しました。');return data}
-async function refresh(){state=await api('adminData');render();status('読み込み完了')}
+async function refresh(){state=await api('adminData');attendeeCounts=new Map();for(const r of state.records){const id=String(r.eventId);if(!attendeeCounts.has(id))attendeeCounts.set(id,new Set());attendeeCounts.get(id).add(String(r.userId))}render();status('読み込み完了')}
 async function run(type,fields,message){try{await api(type,fields);await refresh();status(message||'保存しました。')}catch(e){status(e.message,true)}}
 function render(){
  renderActivities();renderLive();renderOperations();
@@ -69,8 +76,8 @@ function renderStats(){el('eventStatsList').innerHTML=state.eventStats.map(s=>{c
 function todayJapan(){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));return p.year+p.month+p.day}
 function previewEvent(){const name=el('eventActivityName').value.trim(),activity=state.activityTypes.find(a=>a.name===name),newActivity=!!name&&!activity;el('newActivityCodeWrap').hidden=!newActivity;if(newActivity){const proposed=romanize(name);if(lastSuggestedName!==name){el('newActivityCode').value=proposed;lastSuggestedName=name}}else lastSuggestedName='';const code=activity?.code||el('newActivityCode').value.trim().toLowerCase();el('eventPreview').textContent=!name?'イベント名を入力してください。':!activity&&!/^[a-z]{2,32}$/.test(code)?'ローマ字コードを入力してください。':'作成されるイベントID：'+code+todayJapan()}
 let lastSuggestedName='';
-function renderActivities(){const selected=el('activityChoices').value;el('activityChoices').innerHTML='<option value="">新しいイベント名を入力</option>'+state.activityTypes.map(a=>`<option value="${esc(a.code)}">${esc(a.name)}</option>`).join('');el('activityChoices').value=selected;el('activityOptions').innerHTML=state.activityTypes.map(a=>`<option value="${esc(a.name)}"></option>`).join('');previewEvent();el('activityList').innerHTML=state.activityTypes.map(a=>`<div class="item">${esc(a.name)} <span class="muted">${esc(a.code)}</span> <button data-activity-rename="${esc(a.code)}">名前を編集</button><button class="danger" data-activity-delete="${esc(a.code)}">削除</button></div>`).join('')||'活動の種類は未登録です。'}
-function renderLive(){const now=Date.now();el('liveList').innerHTML=state.events.filter(e=>e.status!=='paused'&&new Date(e.expiresAt).getTime()>now).map(e=>{const count=new Set(state.records.filter(r=>String(r.eventId)===String(e.eventId)).map(r=>String(r.userId))).size;const minutes=Math.max(0,Math.ceil((new Date(e.expiresAt).getTime()-now)/60000));const remaining=minutes>=60?Math.floor(minutes/60)+'時間'+minutes%60+'分':minutes+'分';return `<div class="item"><strong>${esc(e.eventName)}</strong><br><span class="muted">${esc(e.eventId)} ／ 参加 ${count}人 ／ 残り ${remaining} ／ 期限 ${esc(date(e.expiresAt))}</span></div>`}).join('')||'現在受付中のイベントはありません。'}
+function renderActivities(){const selected=el('activityChoices').value;el('activityChoices').innerHTML='<option value="">新しいイベント名を入力</option>'+state.activityTypes.map(a=>`<option value="${esc(a.code)}">${esc(a.name)}</option>`).join('');el('activityChoices').value=selected;el('activityOptions').innerHTML=state.activityTypes.map(a=>`<option value="${esc(a.name)}"></option>`).join('');previewEvent();el('activityList').innerHTML=state.activityTypes.map(a=>`<div class="item">${esc(a.name)} <span class="muted">${esc(a.code)}</span> <button data-activity-rename="${esc(a.code)}">名前を編集</button><button class="danger" data-activity-delete="${esc(a.code)}">削除</button></div>`).join('')||'活動の種類は未登録です。';el('seedActivities').hidden=!state.canManageAdmins||[['badominntonn','バドミントン'],['saakurutiishatsushuukin','サークルTシャツ集金'],['bbq','BBQ'],['taikai','大会']].every(([code,name])=>state.activityTypes.some(a=>a.code===code&&a.name===name))}
+function renderLive(){const now=Date.now();el('liveList').innerHTML=state.events.filter(e=>e.status!=='paused'&&new Date(e.expiresAt).getTime()>now).map(e=>{const count=attendeeCounts.get(String(e.eventId))?.size||0;const minutes=Math.max(0,Math.ceil((new Date(e.expiresAt).getTime()-now)/60000));const remaining=minutes>=60?Math.floor(minutes/60)+'時間'+minutes%60+'分':minutes+'分';return `<div class="item"><strong>${esc(e.eventName)}</strong><br><span class="muted">${esc(e.eventId)} ／ 参加 ${count}人 ／ 残り ${remaining} ／ 期限 ${esc(date(e.expiresAt))}</span></div>`}).join('')||'現在受付中のイベントはありません。'}
 const operationLabels={activityAdd:'活動名を登録',activityDelete:'活動名を削除',activityRename:'活動名を編集',eventCreate:'イベントを作成',eventUpdate:'イベントを更新・QR再発行',eventStatus:'受付状態を変更',eventDelete:'イベントを削除',correctStamp:'スタンプを訂正',redeem:'特典を使用済みに変更',adminAdd:'管理者を追加',adminRemove:'管理者を解除'};
 function renderOperations(){el('operationList').innerHTML=(state.operationAudit||[]).slice().reverse().slice(0,100).map(o=>`<div class="item"><strong>${esc(operationLabels[o.action]||o.action)}</strong> ／ ${esc(o.targetId)}<br><span class="muted">${esc(o.detail)} ／ ${esc(date(o.timestamp))} ／ 操作者：${esc(state.adminUsers.find(a=>String(a.userId)===String(o.adminUserId))?.userName||o.adminUserId)}</span></div>`).join('')||'操作履歴はまだありません。'}
 // よく使う活動は指定の表記を採用。変換できない漢字はコード欄で修正する。
@@ -86,6 +93,9 @@ function confirmAction(title,details,{reason=false}={}){return new Promise(resol
 el('eventActivityName').oninput=previewEvent;
 el('activityChoices').onchange=()=>{const activity=state.activityTypes.find(a=>a.code===el('activityChoices').value);if(activity)el('eventActivityName').value=activity.name;else el('eventActivityName').value='';previewEvent()};
 el('newActivityCode').oninput=previewEvent;
+el('activityName').oninput=()=>{const name=el('activityName').value.trim();el('activityCode').value=romanize(name)};
+el('addActivity').onclick=async()=>{const name=el('activityName').value.trim(),code=el('activityCode').value.trim().toLowerCase();if(!name||!/^[a-z]{2,32}$/.test(code)){status('活動名と英小文字2〜32文字のコードを入力してください。',true);return}await run('activityAdd',{name,code},'活動の種類を登録しました。');if(state.activityTypes.some(a=>a.name===name&&a.code===code)){el('activityName').value='';el('activityCode').value=''}};
+el('seedActivities').onclick=async()=>{el('seedActivities').disabled=true;try{const result=await api('activitySeed');await refresh();status(result.added?`${result.added}種類の活動名を登録しました。`:'4種類は登録済みです。')}catch(e){status(e.message,true)}finally{el('seedActivities').disabled=false}};
 el('refreshLive').onclick=async()=>{try{await refresh();status('参加人数を更新しました。')}catch(e){status(e.message,true)}};setInterval(renderLive,30000);
 el('activityList').onclick=async ev=>{const b=ev.target.closest('button');if(!b)return;const code=b.dataset.activityRename??b.dataset.activityDelete;if(!code)return;if(b.dataset.activityRename!==undefined){const old=state.activityTypes.find(a=>a.code===code);const name=prompt('新しい活動名を入力してください。既存イベントの名前は変更されません。',old.name);if(name!==null)await run('activityRename',{code,name:name.trim()},'活動名を変更しました。');return}const yes=await confirmAction('活動の種類を削除',`${code} を削除します。作成済みイベントがある活動は削除できません。`);if(yes)await run('activityDelete',{code},'活動の種類を削除しました。')};
 el('createEvent').onclick=async()=>{try{const eventName=el('eventActivityName').value.trim(),activity=state.activityTypes.find(a=>a.name===eventName),activityCode=activity?.code||el('newActivityCode').value.trim().toLowerCase();if(!eventName||!/^[a-z]{2,32}$/.test(activityCode))throw Error('イベント名とローマ字コードを確認してください。');const result=await api('eventCreate',{eventName,activityCode,stampMode:el('stampMode').value,validHours:Number(el('validHours').value)});await refresh();showQR(state.events.find(e=>String(e.eventId)===result.eventId));status('イベントを作成しました。QRをご利用ください。')}catch(e){status(e.message,true)}};
@@ -98,5 +108,5 @@ el('addAdmin').onclick=async()=>{const uid=el('newAdmin').value;if(!uid){status(
 ['userSearch'].forEach(id=>el(id).oninput=renderUsers);['filterEvent','filterMode','dateFrom','dateTo','historySearch'].forEach(id=>{el(id).addEventListener('input',renderHistory);el(id).addEventListener('change',renderHistory)});
 el('csvRecords').onclick=()=>download('filtered_stamp_records.csv',[['userId','userName','eventId','eventName','timestamp','stampMode','revoked'],...filteredRecords().map(r=>[r.userId,r.userName,r.eventId,r.eventName,r.timestamp,r.stampMode,r.revoked?'yes':'no'])]);
 el('csvBonus').onclick=()=>download('bonus_users.csv',[['userId','userName','stampCount','earnedBonus','redeemedBonus','availableBonus'],...state.users.map(u=>[u.userId,u.userName,u.stampCount,u.earnedBonus,u.redeemedBonus,u.availableBonus])]);
-(async()=>{try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login();return}await refresh();el('panel').hidden=false}catch(e){status(e.message||'管理者として認証できませんでした。',true)}})();
+(async()=>{try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login({redirectUri:new URL('admin.html',location.href).href});return}await refresh();el('panel').hidden=false}catch(e){status(e.message||'管理者として認証できませんでした。',true)}})();
 </script></body></html>
