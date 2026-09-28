@@ -25,6 +25,7 @@ function show(message,detail='',icon='⚠️'){
     document.getElementById('mypage').hidden=false;
     if(!response.ok||!data.ok){
       if(data.code==='ALREADY_RECORDED')show('このイベントは記録済みです','同じ活動のスタンプは1回だけ取得できます。','ℹ️');
+      else if(data.code==='PAUSED')show('このイベントは受付停止中です','スタッフにご確認ください。','⏸️');
       else if(data.code==='EXPIRED')show('QRコードの期限が切れています','スタッフに新しいQRコードをご確認ください。','⌛');
       else show('スタンプを記録できませんでした',data.message||'スタッフにご確認ください。');
       return;
