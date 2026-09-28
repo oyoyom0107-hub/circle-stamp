@@ -1,0 +1,17 @@
+{
+  "name": "MatchPoint 管理画面",
+  "short_name": "MatchPoint 管理",
+  "start_url": "admin.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#edf5f8",
+  "theme_color": "#167b88",
+  "icons": [
+    {
+      "src": "admin-icon.png?v=2",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
