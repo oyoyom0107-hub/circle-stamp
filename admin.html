@@ -64,7 +64,7 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 .menu-grid a{flex-wrap:wrap;align-content:center}
 .menu-grid a small{display:block;flex-basis:100%;margin-left:23px;color:#527c75;font-size:11px;font-weight:500}
 #adminEntry button{height:100%}
-#homeMenu #sheetLink,#homeMenu #homeCollectionLink{display:flex;background:#eaf6f1;color:#075d54;padding:10px 14px;border:1px solid #cee7dc;border-radius:14px;margin:0;text-decoration:none}
+#sheetHub #sheetLink,#sheetHub #homeCollectionLink{display:flex;background:#eaf6f1;color:#075d54;padding:10px 14px;border:1px solid #cee7dc;border-radius:14px;margin:0;text-decoration:none}
 .back-home{background:#e5f4ee;color:#0a6759;box-shadow:none;margin:0 0 16px}
 @media(max-width:430px){.menu-grid{gap:8px}.menu-grid button,.menu-grid a{padding:10px;font-size:13px;min-height:66px}.menu-grid a small{margin-left:0}}
 </style></head><body><header><div class="header-inner"><h1><span aria-hidden="true">🏸</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
@@ -72,19 +72,29 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
   <h2>管理者ホーム</h2><p class="welcome">こんにちは、<strong id="adminGreeting">管理者</strong>さん</p>
   <h3>ダッシュボード</h3><div class="stats" id="stats"></div>
   <h3>メニュー</h3><div class="menu-grid" id="homeMenu">
-    <button type="button" data-screen="events">▦ <span>イベント</span></button>
-    <button type="button" data-screen="roster">◉ <span>未受付者の確認</span></button>
-    <button type="button" data-screen="live">● <span>受付中のイベント</span></button>
+    <button type="button" data-screen="eventHub">▦ <span>イベント・受付</span></button>
     <button type="button" data-screen="notices">◈ <span>参加者へのお知らせ</span></button>
     <button type="button" data-screen="users">♧ <span>参加者・特典管理</span></button>
     <button type="button" data-screen="payments">￥ <span>集金の入金確認</span></button>
     <button type="button" data-screen="historyHub">◷ <span>履歴を確認</span></button>
     <button type="button" data-screen="eventStats">▥ <span>イベント集計</span></button>
     <div id="adminEntry" hidden><button id="openAdmins" type="button">⚙ <span>管理者管理</span></button></div>
-    <a id="sheetLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>CircleStamp-Records</span><small>スプレッドシート</small></a>
-    <a id="homeCollectionLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>集金記録</span><small>スプレッドシート</small></a>
+    <button type="button" data-screen="sheetHub">▤ <span>スプレッドシート</span></button>
   </div>
 </section>
+<section class="box" id="eventHub" hidden><h2>イベント・受付</h2>
+<p class="muted">開く画面を選んでください。</p>
+<div class="menu-grid" id="eventHubMenu">
+<button type="button" data-screen="events">▦ <span>イベント</span></button>
+<button type="button" data-screen="roster">◉ <span>未受付者の確認</span></button>
+<button type="button" data-screen="live">● <span>受付中のイベント</span></button>
+</div></section>
+<section class="box" id="sheetHub" hidden><h2>スプレッドシート</h2>
+<p class="muted">Googleスプレッドシートを開きます。アクセス権はGoogleの共有設定に従います。</p>
+<div class="menu-grid">
+<a id="sheetLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>参加記録</span><small>スプレッドシート</small></a>
+<a id="homeCollectionLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>集金記録</span><small>スプレッドシート</small></a>
+</div></section>
 <section class="box" id="events" hidden><h2>イベント</h2>
 <h3>本日のイベントを作成</h3>
 <label>イベント名を選ぶ<select id="activityChoices"><option value="">選択してください</option></select></label>
@@ -160,7 +170,7 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 const API='https://script.google.com/macros/s/AKfycbxTYedx5VBpe5BPyIsQx0iNwS_3xZ3EaWfQDDyOGSQhP3TK6J0F-VWRfYvTjaOATawn/exec';
 const LIFF_ID='2011752461-qIktF1m8',STAMP_URL=new URL('stamp/index.html',location.href).href;
 let editEventId=null,currentScreen='home';
-const featureScreens=['events','roster','live','notices','payments','users','historyHub','history','eventStats','operations','admins'];
+const featureScreens=['eventHub','sheetHub','events','roster','live','notices','payments','users','historyHub','history','eventStats','operations','admins'];
 let state={operationAudit:[],activityTypes:[],events:[],records:[],redemptions:[],users:[],corrections:[],eventStats:[],adminUsers:[],adminAudit:[],stats:{}};
 let attendeeCounts=new Map();let qrEvent=null;
 const el=id=>document.getElementById(id);
@@ -175,7 +185,7 @@ async function run(type,fields,message){try{await api(type,fields);await refresh
 function render(){
  renderActivities();renderLive();renderOperations();
  const sheetLink=el('sheetLink');sheetLink.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.recordsSheetUrl||'');if(!sheetLink.hidden)sheetLink.href=state.recordsSheetUrl;
- el('adminGreeting').textContent=state.adminUsers.find(a=>String(a.userId)===String(state.currentAdminId))?.userName||'管理者';
+ el('adminGreeting').textContent=state.currentAdminName||state.adminUsers.find(a=>String(a.userId)===String(state.currentAdminId))?.userName||'管理者';
  const collectionHome=el('homeCollectionLink');collectionHome.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.collectionSheetUrl||'');if(!collectionHome.hidden)collectionHome.href=state.collectionSheetUrl;
  el('stats').innerHTML=[['今日の参加者',state.stats.today],['総登録者',state.stats.registered],['今月の参加者',state.stats.month],['未使用特典',state.stats.available]].map(([n,v])=>`<div class="stat">${n}<br><strong>${v}</strong></div>`).join('');
  el('eventList').innerHTML=state.events.map((ev,i)=>{const draft=ev.status==='draft',paused=ev.status==='paused',expired=!draft&&new Date(ev.expiresAt).getTime()<=Date.now();return `<div class="item"><strong>${esc(ev.eventName)}</strong> <span class="pill ${draft?'draft':paused?'paused':expired?'expired':'open'}">${draft?'QR未発行':paused?'受付停止':expired?'期限切れ':'受付中'}</span><br><span class="muted">${esc(ev.eventId)} ／ ${ev.stampMode==='on'?'スタンプ':'記録のみ'} ／ ${draft?'QR発行後 '+esc(ev.expiresAt)+'時間有効':'期限 '+esc(date(ev.expiresAt))}</span><br>${draft?`<button data-publish="${i}">QRを発行して受付開始</button>`:`<button data-edit="${i}">編集</button><button data-qr="${i}">QR表示</button><button data-toggle="${i}" ${expired&&!paused?'disabled':''}>${paused?'受付再開':'受付停止'}</button>`}<button class="danger" data-delete="${i}">削除</button></div>`}).join('')||'イベントなし';
@@ -250,9 +260,9 @@ function showScreen(id,scroll=true){
 featureScreens.forEach(id=>{
  const section=el(id),back=document.createElement('button');
  back.type='button';back.className='back-home';back.textContent='← ホームに戻る';
- back.onclick=()=>showScreen('home');section.prepend(back);
+ back.onclick=()=>showScreen(['events','roster','live'].includes(id)?'eventHub':'home');section.prepend(back);
 });
-el('homeMenu').onclick=ev=>{const id=ev.target.closest('[data-screen]')?.dataset.screen;if(id)showScreen(id)};
+for(const menuId of ['homeMenu','eventHubMenu'])el(menuId).onclick=ev=>{const id=ev.target.closest('[data-screen]')?.dataset.screen;if(id)showScreen(id)};
 el('openHistory').onclick=()=>showScreen('history');el('closeHistory').onclick=()=>showScreen('historyHub');
 el('openOperations').onclick=()=>showScreen('operations');el('closeOperations').onclick=()=>showScreen('historyHub');
 el('openAdmins').onclick=()=>{if(state.canManageAdmins)showScreen('admins')};el('closeAdmins').onclick=()=>showScreen('home');
