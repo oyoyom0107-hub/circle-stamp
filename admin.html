@@ -101,19 +101,58 @@ main{margin:-8px auto 28px}
 #homeMenu .event-entry .event-entry-arrow{color:#e7d18a}
 #adminEntry button{height:auto}
 @media(max-width:430px){#homeScreen .stats{padding:8px;gap:8px}#homeScreen .stat{padding:12px 10px;font-size:12px}#homeMenu button{font-size:14px;min-height:71px}#homeMenu .event-entry{padding:15px;grid-template-columns:46px minmax(0,1fr) 20px;gap:11px}#homeMenu .event-entry .event-entry-icon{width:45px;height:45px;font-size:23px}#homeMenu .event-entry .event-entry-copy strong{font-size:18px}}
-</style></head><body><header><div class="header-inner"><h1><span aria-hidden="true">🏸</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
+
+/* 参照画像に合わせたホーム画面の最終調整 */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body{background:radial-gradient(circle at 40% 0%,#fbfefd 0,#f0faf6 55%,#e8f7f0 100%)}
+header{background:transparent;padding:24px 18px 25px}
+.header-inner{gap:16px}
+header h1{display:flex;align-items:center;gap:9px;color:#082c2d;font-size:clamp(21px,4.2vw,29px)}
+.brand-mark{display:inline-grid;place-items:center;width:41px;height:41px;flex:none;font-weight:950;font-size:27px;line-height:1;letter-spacing:-.14em;padding-right:4px;background:linear-gradient(145deg,#20b08f,#06483d);color:#fff;clip-path:polygon(17% 90%,17% 12%,50% 50%,83% 12%,83% 90%,67% 90%,67% 50%,50% 73%,33% 50%,33% 90%)}
+header button.subtle{font-size:13px;white-space:nowrap}
+main{margin:0 auto 30px}
+#status{margin-bottom:13px}
+#homeScreen{padding-top:14px}
+#homeScreen .welcome{margin:0;font-size:clamp(24px,5vw,34px);font-weight:800;color:#072c2e;line-height:1.3}
+#homeScreen .welcome strong{color:inherit}
+#homeScreen .home-intro{margin:8px 0 25px;color:#718187;font-size:15px}
+#homeScreen .stats{gap:12px;padding:13px;border-radius:23px;box-shadow:0 14px 34px #16594c12}
+#homeScreen .stat{display:flex;align-items:center;gap:14px;min-width:0;min-height:120px;padding:18px 16px;background:linear-gradient(120deg,#f8fcfa,#f2f9f6);font-weight:400}
+.stat-icon{display:grid;place-items:center;flex:none;width:54px;height:54px;border-radius:50%;background:#e3f5ed;color:#096c59}
+.stat-icon svg,.menu-symbol svg,.event-entry-icon svg{width:27px;height:27px}
+.stat-copy{display:grid;gap:2px;min-width:0}.stat-name{font-size:14px;color:#5a6d71;font-weight:600}
+#homeScreen .stat strong{font-size:clamp(25px,4vw,33px);margin:0;line-height:1.25;white-space:nowrap}
+#homeScreen .stat strong small{font-size:13px;font-weight:600}
+#homeScreen h3:not(.sr-only){margin:38px 0 15px;font-size:22px}
+#homeMenu{gap:13px}
+#homeMenu button:not(.event-entry){min-height:94px;padding:15px 23px;border-radius:20px;border:1px solid #fff;box-shadow:0 7px 22px #16594c0d;background:linear-gradient(110deg,#fff,#f7fcf9)}
+#homeMenu button:not(.event-entry) .menu-symbol{width:56px;height:56px;background:#e8f7f0;color:#075d4d}
+#homeMenu .menu-label{display:grid;gap:3px;min-width:0}
+#homeMenu .menu-label strong{font-size:17px;color:#082f30}
+#homeMenu .menu-label small{font-size:12px;font-weight:500;color:#748387;line-height:1.4}
+#homeMenu .event-entry{min-height:124px;border:2px solid #dabf72;border-radius:23px;grid-template-columns:66px minmax(0,1fr) 27px;gap:17px;padding:22px 25px;background:linear-gradient(120deg,#24a990 0%,#08675a 17%,#064e44 73%,#03463e 100%);box-shadow:0 13px 26px #08644930,inset 0 0 0 2px #ffffff12}
+#homeMenu .event-entry::before{left:-4%;top:-107%;width:30%;height:290%;background:linear-gradient(90deg,transparent,#c5fff645,transparent)}
+#homeMenu .event-entry .event-entry-icon{width:62px;height:62px;border:0;border-radius:13px;background:#ffffff14;color:#f8df9b}
+#homeMenu .event-entry .event-entry-icon svg{width:34px;height:34px}
+#homeMenu .event-entry .event-entry-copy{border-left:1px solid #6ad2b7;padding-left:16px;gap:4px}
+#homeMenu .event-entry .event-entry-copy strong{font-size:clamp(19px,3.4vw,24px)}
+#homeMenu .event-entry .event-entry-copy small{font-size:13px}
+#homeMenu .event-entry .event-entry-arrow{font-size:32px}
+@media(max-width:600px){#homeScreen .stat{gap:9px;min-height:92px;padding:12px 9px}.stat-icon{width:42px;height:42px}.stat-icon svg{width:23px;height:23px}.stat-name{font-size:11px}#homeScreen .stat strong{font-size:23px}#homeScreen .stat strong small{font-size:11px}#homeMenu button:not(.event-entry){min-height:77px;padding:11px 14px}#homeMenu button:not(.event-entry) .menu-symbol{width:44px;height:44px}#homeMenu .menu-label strong{font-size:14px}#homeMenu .menu-label small{font-size:10px}#homeMenu .event-entry{min-height:102px;padding:14px;grid-template-columns:46px minmax(0,1fr) 19px;gap:10px}#homeMenu .event-entry .event-entry-icon{width:44px;height:44px}#homeMenu .event-entry .event-entry-icon svg{width:28px;height:28px}#homeMenu .event-entry .event-entry-copy{padding-left:10px}#homeMenu .event-entry .event-entry-copy strong{font-size:17px}#homeMenu .event-entry .event-entry-copy small{font-size:11px}}
+@media(max-width:360px){header h1{font-size:19px}.brand-mark{width:30px;height:30px;font-size:20px}header button.subtle{padding:7px;font-size:11px}#homeScreen .stat{display:block}.stat-icon{margin-bottom:5px}}
+</style></head><body><header><div class="header-inner"><h1><span class="brand-mark" aria-hidden="true">M</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
 <section class="box home" id="homeScreen">
-  <h2>管理者ホーム</h2><p class="welcome">こんにちは、<strong id="adminGreeting">管理者</strong>さん</p>
-  <h3>ダッシュボード</h3><div class="stats" id="stats"></div>
+  <h2 class="sr-only">管理者ホーム</h2><p class="welcome">こんにちは、<strong id="adminGreeting">管理者</strong>さん</p><p class="home-intro">いつも運営ありがとうございます。</p>
+  <h3 class="sr-only">ダッシュボード</h3><div class="stats" id="stats"></div>
   <h3>メニュー</h3><div class="menu-grid" id="homeMenu">
-    <button class="event-entry" type="button" data-screen="eventHub"><span class="event-entry-icon" aria-hidden="true">▦</span><span class="event-entry-copy"><strong>イベント・受付</strong><small>イベントを作成・受付を管理</small></span><span class="event-entry-arrow" aria-hidden="true">›</span></button>
-    <button type="button" data-screen="notices"><span class="menu-symbol" aria-hidden="true">◈</span><span class="menu-label">参加者へのお知らせ</span><span class="menu-chevron" aria-hidden="true">›</span></button>
-    <button type="button" data-screen="users"><span class="menu-symbol" aria-hidden="true">♧</span><span class="menu-label">参加者・特典管理</span><span class="menu-chevron" aria-hidden="true">›</span></button>
-    <button type="button" data-screen="payments"><span class="menu-symbol" aria-hidden="true">￥</span><span class="menu-label">集金の入金確認</span><span class="menu-chevron" aria-hidden="true">›</span></button>
-    <button type="button" data-screen="historyHub"><span class="menu-symbol" aria-hidden="true">◷</span><span class="menu-label">履歴を確認</span><span class="menu-chevron" aria-hidden="true">›</span></button>
-    <button type="button" data-screen="eventStats"><span class="menu-symbol" aria-hidden="true">▥</span><span class="menu-label">イベント集計</span><span class="menu-chevron" aria-hidden="true">›</span></button>
-    <div id="adminEntry" hidden><button id="openAdmins" type="button"><span class="menu-symbol" aria-hidden="true">⚙</span><span class="menu-label">管理者管理</span><span class="menu-chevron" aria-hidden="true">›</span></button></div>
-    <button type="button" data-screen="sheetHub"><span class="menu-symbol" aria-hidden="true">▤</span><span class="menu-label">スプレッドシート</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button class="event-entry" type="button" data-screen="eventHub"><span class="event-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M8 3v6M16 3v6M4 11h16"/></svg></span><span class="event-entry-copy"><strong>イベント・受付</strong><small>イベントを作成・受付を管理</small></span><span class="event-entry-arrow" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="notices"><span class="menu-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h4l10 5V5L8 10H4zM8 14l2 6M21 9v6"/></svg></span><span class="menu-label"><strong>参加者へのお知らせ</strong><small>参加者にメッセージを配信・管理</small></span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="users"><span class="menu-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1"/></svg></span><span class="menu-label"><strong>参加者・特典管理</strong><small>参加者情報の確認・特典の発行</small></span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="payments"><span class="menu-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></span><span class="menu-label"><strong>集金の入金確認</strong><small>参加費の入金状況を確認</small></span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="historyHub"><span class="menu-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></span><span class="menu-label"><strong>履歴を確認</strong><small>イベント・操作の履歴を確認</small></span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="eventStats"><span class="menu-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11h4v9M10 20V4h4v16M16 20v-7h4v7M3 20h18"/></svg></span><span class="menu-label"><strong>イベント集計</strong><small>イベントごとの参加状況を確認</small></span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <div id="adminEntry" hidden><button id="openAdmins" type="button"><span class="menu-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></span><span class="menu-label"><strong>管理者管理</strong><small>管理者の登録・引き継ぎ</small></span><span class="menu-chevron" aria-hidden="true">›</span></button></div>
+    <button type="button" data-screen="sheetHub"><span class="menu-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span class="menu-label"><strong>スプレッドシート</strong><small>参加記録・集金記録を確認</small></span><span class="menu-chevron" aria-hidden="true">›</span></button>
   </div>
 </section>
 <section class="box" id="eventHub" hidden><h2>イベント・受付</h2>
@@ -216,12 +255,13 @@ const day=v=>new Date(v).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 async function api(type,fields={}){const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINE認証が必要です。');const response=await fetch(API,{method:'POST',body:JSON.stringify({type,accessToken,...fields})});const data=await response.json();if(!data.ok)throw Error(data.message||'処理に失敗しました。');return data}
 async function refresh(){state=await api('adminData');attendeeCounts=new Map();for(const r of state.records){const id=String(r.eventId);if(!attendeeCounts.has(id))attendeeCounts.set(id,new Set());attendeeCounts.get(id).add(String(r.userId))}render();showScreen(currentScreen,false);status('読み込み完了')}
 async function run(type,fields,message){try{await api(type,fields);await refresh();status(message||'保存しました。')}catch(e){status(e.message,true)}}
+const statIcons={"calendar": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"6\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M8 3v6M16 3v6M4 11h16\"/></svg>", "people": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1\"/></svg>", "chart": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 20V11h4v9M10 20V4h4v16M16 20v-7h4v7M3 20h18\"/></svg>", "gift": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"11\" rx=\"1\"/><path d=\"M3 10h18M12 10v11M12 10c-7-1-7-7-4-7 2 0 4 3 4 7zm0 0c7-1 7-7 4-7-2 0-4 3-4 7z\"/></svg>"};
 function render(){
  renderActivities();renderLive();renderOperations();
  const sheetLink=el('sheetLink');sheetLink.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.recordsSheetUrl||'');if(!sheetLink.hidden)sheetLink.href=state.recordsSheetUrl;
  el('adminGreeting').textContent=state.currentAdminName||state.adminUsers.find(a=>String(a.userId)===String(state.currentAdminId))?.userName||'管理者';
  const collectionHome=el('homeCollectionLink');collectionHome.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.collectionSheetUrl||'');if(!collectionHome.hidden)collectionHome.href=state.collectionSheetUrl;
- el('stats').innerHTML=[['今日の参加者',state.stats.today],['総登録者',state.stats.registered],['今月の参加者',state.stats.month],['未使用特典',state.stats.available]].map(([n,v])=>`<div class="stat">${n}<br><strong>${v}</strong></div>`).join('');
+ el('stats').innerHTML=[['今日の参加者',state.stats.today,'calendar','人'],['総登録者',state.stats.registered,'people','人'],['今月の参加者',state.stats.month,'chart','人'],['未使用特典',state.stats.available,'gift','件']].map(([n,v,icon,unit])=>`<div class="stat"><span class="stat-icon" aria-hidden="true">${statIcons[icon]}</span><span class="stat-copy"><span class="stat-name">${n}</span><strong>${esc(v)}<small> ${unit}</small></strong></span></div>`).join('');
  el('eventList').innerHTML=state.events.map((ev,i)=>{const draft=ev.status==='draft',paused=ev.status==='paused',expired=!draft&&new Date(ev.expiresAt).getTime()<=Date.now();return `<div class="item"><strong>${esc(ev.eventName)}</strong> <span class="pill ${draft?'draft':paused?'paused':expired?'expired':'open'}">${draft?'QR未発行':paused?'受付停止':expired?'期限切れ':'受付中'}</span><br><span class="muted">${esc(ev.eventId)} ／ ${ev.stampMode==='on'?'スタンプ':'記録のみ'} ／ ${draft?'QR発行後 '+esc(ev.expiresAt)+'時間有効':'期限 '+esc(date(ev.expiresAt))}</span><br>${draft?`<button data-publish="${i}">QRを発行して受付開始</button>`:`<button data-edit="${i}">編集</button><button data-qr="${i}">QR表示</button><button data-toggle="${i}" ${expired&&!paused?'disabled':''}>${paused?'受付再開':'受付停止'}</button>`}<button class="danger" data-delete="${i}">削除</button></div>`}).join('')||'イベントなし';
  renderUsers();renderFilters();renderHistory();renderStats();renderAdmins();renderRoster();renderPayments();renderNotices();
 }
