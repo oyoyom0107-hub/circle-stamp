@@ -2,40 +2,47 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>MatchPoint</title>
-  <style>
-    :root{font-family:system-ui,sans-serif;color:#17324c}body{margin:0;min-height:100vh;background:#edf5f8;display:grid;place-items:center}.card{background:#fff;border-radius:18px;max-width:440px;width:calc(100% - 40px);padding:28px;box-shadow:0 8px 24px #17324c18;text-align:center}a{display:block;padding:14px;margin-top:12px;border-radius:10px;background:#167b88;color:#fff;text-decoration:none}a:last-child{background:#147e70}p{line-height:1.6}
-  </style>
+  <style>:root{font-family:system-ui,sans-serif;color:#17324c}body{margin:0;min-height:100vh;background:#eef8f7;display:grid;place-items:center;text-align:center}main{padding:24px}p{line-height:1.6}a{color:#087763}</style>
 </head>
 <body>
-  <main class="card">
-    <h1>MatchPoint</h1>
-    <p id="status">開くページを選んでください。</p>
-    <nav><a href="mypage.html">マイページ</a><a href="admin.html">管理者ページ</a></nav>
-  </main>
+  <main><p id="status">MatchPointを開いています...</p><a id="fallback" href="mypage.html" hidden>マイページを開く</a></main>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     (async()=>{
       const status=document.getElementById('status');
+      const fallback=document.getElementById('fallback');
+      const root=new URL('./',location.href);
       const params=new URLSearchParams(location.search);
-      const isLiffRedirect=params.has('liff.state');
-      const adminReturn=params.get('to')==='admin';
+      const allowed=['admin.html','mypage.html','stamp/index.html'];
+      let destination=new URL('mypage.html',root);
       try{
-        // LIFF URL の初回遷移では SDK に liff.state を処理させ、元のページへ戻す。
         await liff.init({liffId:'2011752461-qIktF1m8'});
-        if(isLiffRedirect){
-          status.textContent='移動しない場合は、下のリンクからページを開いてください。';
-          return;
+        const state=params.get('liff.state');
+        if(state){
+          const candidate=state.startsWith(root.pathname)
+            ?new URL(state,location.origin)
+            :new URL(state.replace(/^\/+/,''),root);
+          if(candidate.origin===root.origin&&allowed.some(p=>candidate.pathname===new URL(p,root).pathname))destination=candidate;
+        }else if(params.get('to')==='admin'){
+          destination=new URL('admin.html',root);
+        }else if(params.get('event')&&params.get('code')){
+          destination=new URL('stamp/index.html',root);
+          destination.search=new URLSearchParams({event:params.get('event'),code:params.get('code')}).toString();
         }
-        if(adminReturn){
-          if(!liff.isLoggedIn()){
-            liff.login({redirectUri:new URL('index.html?to=admin',location.href).href});
-            return;
-          }
-          location.replace(new URL('admin.html',location.href).href);
+      }catch(error){
+        if(params.get('to')==='admin')destination=new URL('admin.html',root);
+        if(params.get('event')&&params.get('code')){
+          destination=new URL('stamp/index.html',root);
+          destination.search=new URLSearchParams({event:params.get('event'),code:params.get('code')}).toString();
         }
-      }catch(e){status.textContent='自動で開けませんでした。下のリンクからページを選んでください。'}
+      }
+      fallback.href=destination.href;
+      fallback.textContent=destination.pathname.endsWith('/admin.html')?'管理画面を開く':destination.pathname.endsWith('/stamp/index.html')?'スタンプ取得を開く':'マイページを開く';
+      status.textContent='画面を開いています...';
+      fallback.hidden=false;
+      location.replace(destination.href);
     })();
   </script>
 </body>
