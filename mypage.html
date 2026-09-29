@@ -38,7 +38,7 @@
     <p id="refresh-status" class="muted" role="status">読み込み中...</p>
   </section>
   <section class="card" id="summary">読み込み中...</section>
-  <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加や、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
+  <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
   <section class="card"><h2>参加履歴</h2><div id="records"></div></section>
   <section class="card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
 </main>
@@ -101,7 +101,7 @@ function renderMyPage(data){
         const month=formatMonth(r.timestamp);
         const heading=month===previousMonth?'':`<h3 class="month">${escapeHtml(month)}</h3>`;
         previousMonth=month;
-        return `${heading}<div class="record"><div><strong>${escapeHtml(r.eventName||'イベント')}</strong><div class="muted">${escapeHtml(formatDate(r.timestamp))}</div></div><span class="tag ${r.revoked||r.stampMode!=='on'?'off':''}">${r.revoked?'訂正済み':r.stampMode==='on'?'+1 スタンプ':'参加のみ'}</span></div>`;
+        return `${heading}<div class="record"><div><strong>${escapeHtml(r.eventName||'イベント')}</strong><div class="muted">${escapeHtml(formatDate(r.timestamp))}</div></div><span class="tag ${r.revoked||r.stampMode!=='on'?'off':''}">${r.revoked?'訂正済み':r.collection?('集金・'+(r.paymentStatus||'未入金')):r.stampMode==='on'?'+1 スタンプ':'参加のみ'}</span></div>`;
       }).join('')
       :'まだ参加履歴がありません。';
     const redemptions=[...(data.redemptions||[])].sort((a,b)=>new Date(b.redeemedAt)-new Date(a.redeemedAt));
