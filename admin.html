@@ -74,19 +74,46 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 @media(max-width:430px){.menu-grid{gap:8px}.menu-grid button,.menu-grid a{padding:10px;font-size:13px;min-height:66px}.menu-grid a small{margin-left:0}}
 @media(max-width:430px){#homeMenu .event-entry{padding:15px;gap:11px;grid-template-columns:46px minmax(0,1fr) 20px;min-height:94px}.event-entry-icon{width:46px;height:46px;font-size:23px}.event-entry-copy strong{font-size:17px}.event-entry-copy small{font-size:11px}}
 @media(prefers-reduced-motion:reduce){#homeMenu .event-entry{transition:none}}
+/* 管理者ホーム：プレビューの余白・深緑と淡いカードを再現 */
+body{background:#effaf6}
+header{padding:22px 18px 32px;background:#f7fcf9;color:#092e30;box-shadow:none}
+header h1 span:last-child{color:#092e30}
+header button.subtle{background:#e7f4ef;color:#0a5048;border:0;border-radius:999px;padding:9px 15px}
+main{margin:-8px auto 28px}
+#homeScreen{background:transparent;box-shadow:none;border:0;padding:12px 4px 26px}
+#homeScreen h2{font-size:clamp(25px,5vw,32px);margin:0 0 6px}
+#homeScreen .welcome{font-size:18px;margin:0 0 27px;color:#316962}
+#homeScreen .welcome strong{color:#093b3b}
+#homeScreen h3{font-size:20px;color:#082f30;margin:25px 0 13px}
+#homeScreen .stats{background:#fff;padding:13px;border-radius:22px;gap:10px;box-shadow:0 10px 28px #125b4a12}
+#homeScreen .stat{background:linear-gradient(130deg,#f7fcfa,#edf8f4);padding:17px 15px;border-radius:16px;font-weight:650;color:#4e6c6c;line-height:1.55}
+#homeScreen .stat strong{display:inline-block;margin-top:3px;font-size:clamp(25px,5vw,33px);font-weight:800;color:#073c3b}
+#homeMenu{grid-template-columns:1fr;gap:11px}
+#homeMenu button{min-height:79px;padding:13px 16px;border-radius:17px;background:#fff;border:1px solid #e1efe9;color:#104843;box-shadow:0 5px 17px #0b60470b;font-size:16px;gap:13px}
+#homeMenu button:not(.event-entry) .menu-symbol{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#e5f5ed;color:#0a675a;font-size:21px;flex:none}
+#homeMenu button:not(.event-entry) .menu-label{flex:1}
+#homeMenu button:not(.event-entry) .menu-chevron{margin-left:auto;font-size:24px;font-weight:400;color:#267262}
+#homeMenu .event-entry{min-height:105px;border:1.5px solid #d5b965;border-radius:20px;padding:18px 20px;grid-template-columns:56px minmax(0,1fr) 25px;gap:15px;background:linear-gradient(128deg,#22a58b 0%,#0b6658 17%,#064a42 65%,#043b38 100%);box-shadow:0 12px 24px #064c3a2d,inset 0 1px #ffffff30;color:#fff;position:relative;overflow:hidden}
+#homeMenu .event-entry::before{content:"";position:absolute;left:2%;top:-105%;width:27%;height:260%;transform:rotate(35deg);background:linear-gradient(90deg,transparent,#ffffff1b,transparent);pointer-events:none}
+#homeMenu .event-entry .event-entry-icon{width:53px;height:53px;border-radius:12px;background:#ffffff16;border:1px solid #e1d3908c;color:#f4e4b3;font-size:27px}
+#homeMenu .event-entry .event-entry-copy strong{font-size:21px}
+#homeMenu .event-entry .event-entry-copy small{font-size:12px;color:#e4f7ef}
+#homeMenu .event-entry .event-entry-arrow{color:#e7d18a}
+#adminEntry button{height:auto}
+@media(max-width:430px){#homeScreen .stats{padding:8px;gap:8px}#homeScreen .stat{padding:12px 10px;font-size:12px}#homeMenu button{font-size:14px;min-height:71px}#homeMenu .event-entry{padding:15px;grid-template-columns:46px minmax(0,1fr) 20px;gap:11px}#homeMenu .event-entry .event-entry-icon{width:45px;height:45px;font-size:23px}#homeMenu .event-entry .event-entry-copy strong{font-size:18px}}
 </style></head><body><header><div class="header-inner"><h1><span aria-hidden="true">🏸</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
 <section class="box home" id="homeScreen">
   <h2>管理者ホーム</h2><p class="welcome">こんにちは、<strong id="adminGreeting">管理者</strong>さん</p>
   <h3>ダッシュボード</h3><div class="stats" id="stats"></div>
   <h3>メニュー</h3><div class="menu-grid" id="homeMenu">
     <button class="event-entry" type="button" data-screen="eventHub"><span class="event-entry-icon" aria-hidden="true">▦</span><span class="event-entry-copy"><strong>イベント・受付</strong><small>イベントを作成・受付を管理</small></span><span class="event-entry-arrow" aria-hidden="true">›</span></button>
-    <button type="button" data-screen="notices">◈ <span>参加者へのお知らせ</span></button>
-    <button type="button" data-screen="users">♧ <span>参加者・特典管理</span></button>
-    <button type="button" data-screen="payments">￥ <span>集金の入金確認</span></button>
-    <button type="button" data-screen="historyHub">◷ <span>履歴を確認</span></button>
-    <button type="button" data-screen="eventStats">▥ <span>イベント集計</span></button>
-    <div id="adminEntry" hidden><button id="openAdmins" type="button">⚙ <span>管理者管理</span></button></div>
-    <button type="button" data-screen="sheetHub">▤ <span>スプレッドシート</span></button>
+    <button type="button" data-screen="notices"><span class="menu-symbol" aria-hidden="true">◈</span><span class="menu-label">参加者へのお知らせ</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="users"><span class="menu-symbol" aria-hidden="true">♧</span><span class="menu-label">参加者・特典管理</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="payments"><span class="menu-symbol" aria-hidden="true">￥</span><span class="menu-label">集金の入金確認</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="historyHub"><span class="menu-symbol" aria-hidden="true">◷</span><span class="menu-label">履歴を確認</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <button type="button" data-screen="eventStats"><span class="menu-symbol" aria-hidden="true">▥</span><span class="menu-label">イベント集計</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+    <div id="adminEntry" hidden><button id="openAdmins" type="button"><span class="menu-symbol" aria-hidden="true">⚙</span><span class="menu-label">管理者管理</span><span class="menu-chevron" aria-hidden="true">›</span></button></div>
+    <button type="button" data-screen="sheetHub"><span class="menu-symbol" aria-hidden="true">▤</span><span class="menu-label">スプレッドシート</span><span class="menu-chevron" aria-hidden="true">›</span></button>
   </div>
 </section>
 <section class="box" id="eventHub" hidden><h2>イベント・受付</h2>
