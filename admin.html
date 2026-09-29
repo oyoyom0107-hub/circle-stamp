@@ -115,5 +115,5 @@ el('addAdmin').onclick=async()=>{const uid=el('newAdmin').value;if(!uid){status(
 ['userSearch'].forEach(id=>el(id).oninput=renderUsers);['filterEvent','filterMode','dateFrom','dateTo','historySearch'].forEach(id=>{el(id).addEventListener('input',renderHistory);el(id).addEventListener('change',renderHistory)});
 el('csvRecords').onclick=()=>download('filtered_stamp_records.csv',[['userId','userName','eventId','eventName','timestamp','stampMode','revoked'],...filteredRecords().map(r=>[r.userId,r.userName,r.eventId,r.eventName,r.timestamp,r.stampMode,r.revoked?'yes':'no'])]);
 el('csvBonus').onclick=()=>download('bonus_users.csv',[['userId','userName','stampCount','earnedBonus','redeemedBonus','availableBonus'],...state.users.map(u=>[u.userId,u.userName,u.stampCount,u.earnedBonus,u.redeemedBonus,u.availableBonus])]);
-(async()=>{try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login({redirectUri:new URL('admin.html',location.href).href});return}await refresh();el('panel').hidden=false}catch(e){status(e.message||'管理者として認証できませんでした。',true)}})();
+(async()=>{try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login({redirectUri:new URL('index.html?to=admin',location.href).href});return}await refresh();el('panel').hidden=false}catch(e){status(e.message||'管理者として認証できませんでした。',true)}})();
 </script></body></html>
