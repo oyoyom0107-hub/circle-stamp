@@ -10,6 +10,7 @@
     .header{background:#168b77;color:#fff;text-align:center;padding:22px}
     main{max-width:680px;margin:20px auto;padding:0 16px}
     .card{background:#fff;padding:20px;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 18px #17324c12}
+    .shop{background:linear-gradient(140deg,#07565b,#13877b 70%,#32a497);color:#fff;position:relative;overflow:hidden;padding:26px;box-shadow:0 12px 28px #07565b35}.shop::after{content:"";position:absolute;width:170px;height:170px;right:-65px;top:-70px;border:2px solid #ffffff35;border-radius:50%;pointer-events:none}.shop .muted{color:#dbf4ec}.shop h2{margin:0 0 18px;font-size:18px}.shop .big{font-size:28px}.shop .stamp{border-color:#e7faf2;color:#f3fff9;background:#ffffff20}.shop .stamp.on{background:#fff;color:#087a71}.shop .stamps{justify-content:flex-start}.shop .bonus{display:inline-block;background:#ffffffec;color:#07565b;padding:9px 14px;border-radius:22px;font-weight:700}.shop p{line-height:1.5}.tools{display:flex;gap:10px;align-items:center;margin:0 0 14px}.refresh-button{width:auto!important;padding:7px 12px!important;font-size:13px!important;white-space:nowrap}.upcoming .notice{margin-top:8px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.upcoming .item{padding:13px 0;border-top:1px solid #e5eeee}.upcoming .pill{background:#e6f5f0;color:#087763;border-radius:20px;padding:4px 9px;font-size:13px}.upcoming .pill.done{background:#edf1f3;color:#536977}
     .stamps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:20px 0}
     .stamp{width:42px;height:42px;border-radius:50%;border:2px solid #168b77;display:grid;place-items:center;color:#168b77;font-size:24px}
     .stamp.on{background:#168b77;color:#fff}
@@ -29,15 +30,13 @@
 <body>
 <header class="header"><h1>MatchPoint スタンプカード</h1></header>
 <main>
+  <section class="card shop" id="summary" aria-label="ショップカード">読み込み中...</section>
+  <div class="tools"><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 更新</button><span id="refresh-status" class="muted" role="status">読み込み中...</span></div>
+  <section class="card upcoming"><h2>参加予定イベント・お知らせ</h2><div id="upcoming">読み込み中...</div></section>
   <section class="card">
     <button type="button" id="scan-button" class="scan-button" disabled>📷 活動のQRコードを読み取る</button>
     <p id="scan-status" class="muted" role="status">読み取り機能を確認中...</p>
   </section>
-  <section class="card">
-    <button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button>
-    <p id="refresh-status" class="muted" role="status">読み込み中...</p>
-  </section>
-  <section class="card" id="summary">読み込み中...</section>
   <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
   <section class="card"><h2>参加履歴</h2><div id="records"></div></section>
   <section class="card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
@@ -94,7 +93,12 @@ function renderMyPage(data){
     const count=data.stampCount;
     const rem=count%5;
     const toNext=5-rem;
-    summary.innerHTML=`<div class="big">合計スタンプ：${count}個</div><div class="stamps">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}">${i<rem?'●':'○'}</span>`).join('')}</div><p>${rem===0&&count>0?'🎉 5回の参加で特典を獲得しました！':`あと${toNext}回で次の特典！`}</p><p>🎁 利用可能な特典：<strong>${data.availableBonus}個</strong></p><p class="muted">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p>特典を受け取る際はスタッフにお声がけください。</p>':''}`;
+    summary.innerHTML=`<h2>✦ MatchPoint SHOP CARD</h2><div class="big">${count} <small>スタンプ</small></div><div class="stamps">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-label="${i<rem?'獲得済み':'未獲得'}">${i<rem?'★':'○'}</span>`).join('')}</div><p>${rem===0&&count>0?'次の特典まであと5個':`次の特典まであと${toNext}個`}</p><span class="bonus">🎁 使える特典 ${data.availableBonus}個</span><p class="muted">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p>特典を受け取る際はスタッフにお声がけください。</p>':''}`;
+    const upcoming=data.upcoming||[];
+    document.getElementById('upcoming').innerHTML=upcoming.length?upcoming.map(e=>{
+      const details=[e.startsAt?`日時：${escapeHtml(formatDate(e.startsAt))}`:'',e.location?`場所：${escapeHtml(e.location)}`:'',e.belongings?`持ち物：${escapeHtml(e.belongings)}`:''].filter(Boolean).join('<br>');
+      return `<div class="item"><strong>${escapeHtml(e.eventName)}</strong> <span class="pill ${['受付済み','期限切れ'].includes(e.status)?'done':''}">${escapeHtml(e.status)}</span>${details?`<div class="notice muted">${details}</div>`:''}</div>`;
+    }).join(''):'参加予定のイベントはありません。';
     let previousMonth='';
     document.getElementById('records').innerHTML=history.length
       ?history.map(r=>{
