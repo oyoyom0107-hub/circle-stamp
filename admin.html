@@ -63,16 +63,23 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 .menu-grid button:focus-visible,.menu-grid a:focus-visible{outline:3px solid #2ea68d;outline-offset:2px}
 .menu-grid a{flex-wrap:wrap;align-content:center}
 .menu-grid a small{display:block;flex-basis:100%;margin-left:23px;color:#527c75;font-size:11px;font-weight:500}
+#homeMenu .event-entry{grid-column:1/-1;min-height:104px;display:grid;grid-template-columns:52px minmax(0,1fr) 28px;gap:14px;align-items:center;padding:18px 20px;color:#fff;background:radial-gradient(circle at 92% 15%,#31ab8970,transparent 44%),linear-gradient(115deg,#064641,#087667);border:1px solid #228a75;border-radius:19px;box-shadow:0 12px 25px #075b4d35;transition:transform .18s ease,box-shadow .18s ease}
+#homeMenu .event-entry:hover:not(:disabled){filter:none;transform:translateY(-2px);box-shadow:0 16px 30px #075b4d42}
+#homeMenu .event-entry:active{transform:translateY(0)}
+.event-entry-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:#ffffff24;border:1px solid #ffffff55;font-size:26px}
+.event-entry-copy{display:grid;gap:4px}.event-entry-copy strong{font-size:19px;letter-spacing:.02em}.event-entry-copy small{color:#e1f8ed;font-size:12px;font-weight:500;line-height:1.4}.event-entry-arrow{font-size:27px;color:#e6d197;text-align:right}
 #adminEntry button{height:100%}
 #sheetHub #sheetLink,#sheetHub #homeCollectionLink{display:flex;background:#eaf6f1;color:#075d54;padding:10px 14px;border:1px solid #cee7dc;border-radius:14px;margin:0;text-decoration:none}
 .back-home{background:#e5f4ee;color:#0a6759;box-shadow:none;margin:0 0 16px}
 @media(max-width:430px){.menu-grid{gap:8px}.menu-grid button,.menu-grid a{padding:10px;font-size:13px;min-height:66px}.menu-grid a small{margin-left:0}}
+@media(max-width:430px){#homeMenu .event-entry{padding:15px;gap:11px;grid-template-columns:46px minmax(0,1fr) 20px;min-height:94px}.event-entry-icon{width:46px;height:46px;font-size:23px}.event-entry-copy strong{font-size:17px}.event-entry-copy small{font-size:11px}}
+@media(prefers-reduced-motion:reduce){#homeMenu .event-entry{transition:none}}
 </style></head><body><header><div class="header-inner"><h1><span aria-hidden="true">🏸</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
 <section class="box home" id="homeScreen">
   <h2>管理者ホーム</h2><p class="welcome">こんにちは、<strong id="adminGreeting">管理者</strong>さん</p>
   <h3>ダッシュボード</h3><div class="stats" id="stats"></div>
   <h3>メニュー</h3><div class="menu-grid" id="homeMenu">
-    <button type="button" data-screen="eventHub">▦ <span>イベント・受付</span></button>
+    <button class="event-entry" type="button" data-screen="eventHub"><span class="event-entry-icon" aria-hidden="true">▦</span><span class="event-entry-copy"><strong>イベント・受付</strong><small>イベントを作成・受付を管理</small></span><span class="event-entry-arrow" aria-hidden="true">›</span></button>
     <button type="button" data-screen="notices">◈ <span>参加者へのお知らせ</span></button>
     <button type="button" data-screen="users">♧ <span>参加者・特典管理</span></button>
     <button type="button" data-screen="payments">￥ <span>集金の入金確認</span></button>
