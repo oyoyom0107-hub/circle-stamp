@@ -25,20 +25,53 @@
     .refresh-button:disabled{opacity:.55;cursor:not-allowed}
     #refresh-status{min-height:1.4em;margin:8px 0 0}
     .monthly-item{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid #e5eeee}
+
+    *{box-sizing:border-box}
+    :root{color:#123d45;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
+    body{background:radial-gradient(circle at 12% 1%,#e5f5f0 0,#f5fbf9 42%,#eef7f5 100%)}
+    .header{background:transparent;color:#07585a;padding:23px 16px 6px}
+    .header h1{font-size:clamp(22px,5vw,30px);margin:0;font-weight:800;letter-spacing:.02em}
+    main{margin:14px auto;padding:0 14px 24px}
+    .card{border-radius:25px;box-shadow:0 12px 32px #055e5411;padding:24px;margin-bottom:18px}
+    .shop{min-height:294px;padding:28px 26px;background:radial-gradient(circle at 88% 19%,#19a08d66,transparent 45%),linear-gradient(135deg,#06555b,#087e71 63%,#006b66);border-radius:27px}
+    .shop::before{content:"";position:absolute;right:-50px;top:30px;width:260px;height:260px;border:1px solid #ffffff30;border-radius:50%;transform:rotate(-20deg)}
+    .shop::after{width:330px;height:330px;top:auto;bottom:-220px;right:auto;left:-120px;background:#26a49a25;border:1px solid #ffffff20}
+    .shop h2{font-size:18px;letter-spacing:.13em;margin:0 0 22px;color:#eafff7}
+    .shop .balance{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+    .shop .count-label{display:block;font-size:16px;font-weight:700}
+    .shop .big{font-size:clamp(52px,14vw,82px);line-height:1.07;letter-spacing:-.04em}
+    .shop .big small{font-size:22px;letter-spacing:0}
+    .shop .bonus{border-radius:999px;background:linear-gradient(95deg,#fff4be,#ffda76);color:#3c3216;box-shadow:0 5px 18px #033d3d44;font-size:14px}
+    .shop .stamps{justify-content:space-between;flex-wrap:nowrap;margin:26px 0 18px;gap:7px}
+    .shop .stamp{width:clamp(36px,13vw,66px);height:clamp(36px,13vw,66px);flex:0 1 66px;border:2px dashed #cefff2aa;font-size:clamp(19px,6vw,29px);color:#fff}
+    .shop .stamp.on{border:2px solid #fff;background:#fff;box-shadow:0 5px 10px #003f3e77;color:#087b70}
+    .shop .progress{margin:0;text-align:center;font-size:17px}
+    .shop .totals{text-align:center;margin-bottom:0;font-size:12px}
+    .tools{justify-content:flex-end;flex-wrap:wrap;margin:0 0 10px}
+    .refresh-button{border-radius:999px!important}
+    #refresh-status{margin:0;min-height:0;font-size:12px;flex-basis:100%;text-align:right}
+    .card h2{color:#07585a;margin:0 0 18px;font-size:21px}
+    .shop h2{color:#eafff7}
+    .upcoming .item{background:#f1f8f7;border:0;border-radius:17px;padding:16px;margin-bottom:12px}
+    .upcoming .item strong{font-size:17px}
+    .upcoming .pill{float:right;background:#e2f5e6;color:#137748;font-weight:700}
+    .upcoming .pill.done{background:#e8edef;color:#526c72}
+    .upcoming .notice{clear:both;padding-top:8px}
+    .scan-button{background:linear-gradient(100deg,#087f76,#078d83);box-shadow:0 6px 16px #087f7644}
+    .record{line-height:1.5}
+    @media(max-width:390px){.shop{padding:22px 18px}.shop .bonus{font-size:12px}.upcoming .pill{float:none;display:inline-block;margin-left:4px}}
   </style>
 </head>
 <body>
 <header class="header"><h1>MatchPoint スタンプカード</h1></header>
 <main>
   <section class="card shop" id="summary" aria-label="ショップカード">読み込み中...</section>
-  <div class="tools"><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 更新</button><span id="refresh-status" class="muted" role="status">読み込み中...</span></div>
-  <section class="card upcoming"><h2>参加予定イベント・お知らせ</h2><div id="upcoming">読み込み中...</div></section>
-  <section class="card">
-    <button type="button" id="scan-button" class="scan-button" disabled>📷 活動のQRコードを読み取る</button>
+  <section class="card upcoming"><div class="tools"><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button><span id="refresh-status" class="muted" role="status">読み込み中...</span></div><h2>▦ 参加予定イベント</h2><div id="upcoming">読み込み中...</div>
+    <button type="button" id="scan-button" class="scan-button" disabled>▣ QRコードを読み取る</button>
     <p id="scan-status" class="muted" role="status">読み取り機能を確認中...</p>
   </section>
+  <section class="card"><h2>◷ スタンプ・参加履歴</h2><div id="records"></div></section>
   <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
-  <section class="card"><h2>参加履歴</h2><div id="records"></div></section>
   <section class="card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
 </main>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -93,7 +126,7 @@ function renderMyPage(data){
     const count=data.stampCount;
     const rem=count%5;
     const toNext=5-rem;
-    summary.innerHTML=`<h2>✦ MatchPoint SHOP CARD</h2><div class="big">${count} <small>スタンプ</small></div><div class="stamps">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-label="${i<rem?'獲得済み':'未獲得'}">${i<rem?'★':'○'}</span>`).join('')}</div><p>${rem===0&&count>0?'次の特典まであと5個':`次の特典まであと${toNext}個`}</p><span class="bonus">🎁 使える特典 ${data.availableBonus}個</span><p class="muted">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p>特典を受け取る際はスタッフにお声がけください。</p>':''}`;
+    summary.innerHTML=`<h2>◈ MatchPoint <span aria-label="ショップカード">SHOP CARD</span></h2><div class="balance"><div><span class="count-label">スタンプ</span><div class="big">${count}<small> 個</small></div></div><span class="bonus">🎁 利用できる特典 ${data.availableBonus}個</span></div><div class="stamps" role="img" aria-label="5個ごとに特典。今回のカードは${rem}個獲得済み">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-hidden="true">${i<rem?'🏸':''}</span>`).join('')}</div><p class="progress">次の特典まであと <strong>${toNext}個</strong></p><p class="muted totals">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p class="progress">特典を受け取る際はスタッフにお声がけください。</p>':''}`;
     const upcoming=data.upcoming||[];
     document.getElementById('upcoming').innerHTML=upcoming.length?upcoming.map(e=>{
       const details=[e.startsAt?`日時：${escapeHtml(formatDate(e.startsAt))}`:'',e.location?`場所：${escapeHtml(e.location)}`:'',e.belongings?`持ち物：${escapeHtml(e.belongings)}`:''].filter(Boolean).join('<br>');

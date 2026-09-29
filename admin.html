@@ -8,9 +8,6 @@
 <style>
 :root{font-family:system-ui,sans-serif;color:#17324c}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:#edf5f8}header{background:#167b88;color:#fff;padding:20px;text-align:center}main{max-width:920px;margin:20px auto;padding:0 14px}.box{background:#fff;border-radius:15px;margin:14px 0;padding:20px;box-shadow:0 3px 15px #17324c12}h2{font-size:20px}h3{font-size:17px}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:#e9f6f4;padding:14px;border-radius:10px}.stat strong{font-size:25px}input,select,button{font:inherit;padding:10px;border:1px solid #b4c8cf;border-radius:8px}input,select{width:100%;margin:6px 0 12px}button{background:#147e70;color:#fff;border:0;cursor:pointer;margin:5px 4px 5px 0}button.danger{background:#b23c45}button:disabled{opacity:.5}button.subtle{background:#e9f2f3;color:#35636b;padding:7px 10px;font-size:13px}.item{border-top:1px solid #dce7eb;padding:12px 0;overflow-wrap:anywhere}.muted{color:#577080;font-size:14px}.error{color:#ae2b38}#status{min-height:24px;position:sticky;top:0;background:#edf5f8;padding:9px 4px;z-index:2}#qr img{max-width:100%}a{overflow-wrap:anywhere}#sheetLink{display:inline-block;background:#147e70;color:#fff;border-radius:8px;padding:12px 16px;margin-top:14px;text-decoration:none}nav a{display:inline-block;margin:5px;color:#167b88}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pill{display:inline-block;padding:3px 8px;border-radius:20px;background:#e9f6f4}.paused,.revoked{color:#ae2b38}.small{font-size:13px}.help{line-height:1.6}.roster-choices{max-height:260px;overflow:auto;border:1px solid #b4c8cf;border-radius:8px;padding:4px 10px;margin:8px 0}.roster-choices label{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid #dce7eb}.roster-choices input{width:auto;margin:0;flex:none}dialog{border:0;border-radius:14px;padding:22px;max-width:440px;width:calc(100% - 28px);box-shadow:0 12px 40px #1235}dialog::backdrop{background:#16263899}@media(max-width:600px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body><header><h1>MatchPoint 管理画面</h1></header><main><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button><p id="status" role="status">確認中...</p><div id="panel" hidden>
-<nav><a href="#events">イベント</a><a href="#users">参加者・特典</a><a href="#eventStats">集計</a></nav>
-<section class="box"><h2>ダッシュボード</h2><div class="stats" id="stats"></div><a id="sheetLink" href="#" target="_blank" rel="noopener noreferrer" hidden>スプレッドシートを開く</a></section>
-<section class="box" id="live"><h2>受付中のイベント</h2><button id="refreshLive" type="button">参加人数を更新</button><p class="muted">残り時間は画面上で更新します。参加人数は「参加人数を更新」で再取得します。</p><div id="liveList"></div></section>
 <section class="box" id="events"><h2>イベント</h2>
 <h3>本日のイベントを作成</h3>
 <label>イベント名を選ぶ<select id="activityChoices"><option value="">選択してください</option></select></label>
@@ -30,11 +27,18 @@
 <p class="muted help">更新後もイベントIDとイベント名は変わりません。QRは再発行され、以前のQRは無効になります。受付停止中なら停止は継続します。</p></div>
 <div id="qr"></div><div id="eventList"></div>
 <h3>参加者へのお知らせ</h3><p class="muted">参加予定に登録した人のマイページに表示します。未入力の項目は表示されません。</p>
-<label>イベント<select id="noticeEvent"></select></label>
+<label>活動・イベントを選ぶ<select id="noticeEvent"></select></label>
+<p id="noticeSelectionHint" class="muted"></p>
+<div id="noticeCreate" hidden><p class="muted">この活動で本日のイベントを作成すると、お知らせを登録できます。QRは後から発行します。</p>
+<label id="noticePurposeWrap" hidden>集金の種類<input id="noticePurpose" maxlength="60" placeholder="例：サークルTシャツ代"></label>
+<button id="createNoticeEvent" type="button" class="subtle">この活動で本日のイベントを作成</button></div>
 <label>開催日時（日本時間）<input id="noticeStartsAt" type="datetime-local"></label>
 <label>場所<input id="noticeLocation" maxlength="120" placeholder="例：体育館"></label>
 <label>持ち物<input id="noticeBelongings" maxlength="300" placeholder="例：室内シューズ、飲み物"></label>
 <button id="saveNotice" type="button">お知らせを保存</button><button id="openActivities" type="button" class="subtle">活動の種類を登録・管理</button></section>
+<nav><a href="#events">イベント</a><a href="#users">参加者・特典</a><a href="#eventStats">集計</a></nav>
+<section class="box"><h2>ダッシュボード</h2><div class="stats" id="stats"></div><a id="sheetLink" href="#" target="_blank" rel="noopener noreferrer" hidden>スプレッドシートを開く</a></section>
+<section class="box" id="live"><h2>受付中のイベント</h2><button id="refreshLive" type="button">参加人数を更新</button><p class="muted">残り時間は画面上で更新します。参加人数は「参加人数を更新」で再取得します。</p><div id="liveList"></div></section>
 <section class="box" id="roster"><h2>未受付者の確認</h2>
 <label>イベント<select id="rosterEvent"></select></label>
 <p>参加予定者を選択（複数可）</p><div id="rosterUsers" class="roster-choices"></div><button id="addRegistrant" type="button">選択した人を参加予定に登録</button>
@@ -92,8 +96,35 @@ function render(){
  renderUsers();renderFilters();renderHistory();renderStats();renderAdmins();renderRoster();renderPayments();renderNotices();
 }
 function renderRoster(){const selected=el('rosterEvent').value;el('rosterEvent').innerHTML='<option value="">イベントを選択</option>'+state.events.map(e=>`<option value="${esc(e.eventId)}">${esc(e.eventName)}</option>`).join('');el('rosterEvent').value=selected;const id=el('rosterEvent').value;const list=(state.registrations||[]).filter(r=>String(r.eventId)===id);const registered=new Set(list.map(r=>String(r.userId)));const previous=new Set([...el('rosterUsers').querySelectorAll('input:checked')].map(input=>input.value));const candidates=id?state.users.filter(u=>!registered.has(String(u.userId))):[];el('rosterUsers').innerHTML=candidates.map(u=>`<label><input type="checkbox" value="${esc(u.userId)}" ${previous.has(String(u.userId))?'checked':''}><span>${esc(u.userName)} <span class="muted">（${esc(u.userId)}）</span></span></label>`).join('')||(id?'追加できる参加者はいません。':'先にイベントを選択してください。');const checked=attendeeCounts.get(id)||new Set();const selectedManual=el('manualUser').value;const currentEvent=state.events.find(e=>String(e.eventId)===id);const canCheckin=currentEvent?.status==='open'&&new Date(currentEvent.expiresAt).getTime()>Date.now();const waiting=list.filter(r=>!checked.has(String(r.userId)));el('manualUser').innerHTML='<option value="">参加予定者を選択</option>'+waiting.map(r=>`<option value="${esc(r.userId)}">${esc(r.userName)}</option>`).join('');el('manualUser').value=selectedManual;el('manualCheckin').disabled=!canCheckin||!waiting.length;el('rosterList').innerHTML=!id?'イベントを選択してください。':`<p>参加予定 ${list.length}人 ／ 未受付 ${list.filter(r=>!checked.has(String(r.userId))).length}人</p>`+list.map(r=>`<div class="item"><strong>${esc(r.userName)}</strong> <span class="pill">${checked.has(String(r.userId))?'受付済み':'未受付'}</span><br><button data-unregister="${esc(r.userId)}" class="subtle">予定から外す</button></div>`).join('')}
-function renderNotices(){const current=el('noticeEvent').value;el('noticeEvent').innerHTML='<option value="">イベントを選択</option>'+state.events.map(e=>`<option value="${esc(e.eventId)}">${esc(e.eventName)}</option>`).join('');el('noticeEvent').value=current;if(!state.events.some(e=>String(e.eventId)===current))el('noticeEvent').value='';fillNotice()}
-function fillNotice(){const notice=(state.eventNotices||[]).find(n=>String(n.eventId)===el('noticeEvent').value);el('noticeStartsAt').value=notice?.startsAt?new Date(notice.startsAt).toLocaleString('sv-SE',{timeZone:'Asia/Tokyo'}).slice(0,16):'';el('noticeLocation').value=notice?.location||'';el('noticeBelongings').value=notice?.belongings||''}
+function renderNotices(){
+ const current=el('noticeEvent').value;
+ el('noticeEvent').innerHTML='<option value="">活動またはイベントを選択</option>'+
+  '<optgroup label="登録済みの活動">'+state.activityTypes.filter(a=>a.code!=='saakurutiishatsushuukin').map(a=>`<option value="activity:${esc(a.code)}">${esc(a.name)}</option>`).join('')+'</optgroup>'+
+  '<optgroup label="作成済みのイベント">'+state.events.map(e=>`<option value="${esc(e.eventId)}">${esc(e.eventName)}（${esc(e.eventId)}）</option>`).join('')+'</optgroup>';
+ el('noticeEvent').value=current;
+ if(el('noticeEvent').value!==current)el('noticeEvent').value='';
+ fillNotice();
+}
+function fillNotice(){
+ const selected=el('noticeEvent').value,activityCode=selected.startsWith('activity:')?selected.slice(9):'';
+ const activity=state.activityTypes.find(a=>String(a.code)===activityCode);
+ const today=todayJapan();
+ const matches=activity?state.events.filter(e=>activityCode==='shuukin'
+  ?String(e.eventId).startsWith('shuukin')&&String(e.eventId).endsWith(today)&&String(e.eventName).startsWith('集金：')
+  :String(e.eventId)===activityCode+today):[];
+ if(activity&&matches.length===1){el('noticeEvent').value=String(matches[0].eventId);return fillNotice()}
+ const create=!!activity&&(activityCode==='shuukin'||matches.length===0);
+ el('noticeCreate').hidden=!create;
+ el('noticePurposeWrap').hidden=activityCode!=='shuukin';
+ el('saveNotice').disabled=!!activity||!selected;
+ el('noticeSelectionHint').textContent=activity
+  ?matches.length>1?'この活動のイベントが複数あります。「作成済みのイベント」から対象を選んでください。':create?'イベントを作成してからお知らせを保存してください。':''
+  :selected?'選択したイベントの参加予定者に表示します。':'登録済みの活動、または作成済みのイベントを選んでください。';
+ const notice=(state.eventNotices||[]).find(n=>String(n.eventId)===selected);
+ el('noticeStartsAt').value=notice?.startsAt?new Date(notice.startsAt).toLocaleString('sv-SE',{timeZone:'Asia/Tokyo'}).slice(0,16):'';
+ el('noticeLocation').value=notice?.location||'';
+ el('noticeBelongings').value=notice?.belongings||'';
+}
 function renderPayments(){const entries=state.records.filter(r=>r.collection).slice().reverse();const groups=new Map();for(const e of state.events.filter(e=>String(e.eventId).startsWith('shuukin')&&String(e.eventName).startsWith('集金：'))){groups.set(String(e.eventId),{name:e.eventName,received:0,paid:0})}for(const r of entries){const id=String(r.eventId);if(!groups.has(id))groups.set(id,{name:r.eventName,received:0,paid:0});const group=groups.get(id);group.received++;if(r.paymentStatus==='入金済み')group.paid++}el('paymentSummary').innerHTML=[...groups].reverse().map(([id,g])=>`<div class="item"><strong>${esc(g.name)}</strong> <span class="muted">${esc(id)}</span><br>受付 ${g.received}人 ／ 入金済み ${g.paid}人 ／ <strong>未入金 ${g.received-g.paid}人</strong></div>`).join('')||'集金イベントはありません。';const link=el('collectionSheetLink');link.hidden=!state.collectionSpreadsheetUrl;if(!link.hidden)link.href=state.collectionSpreadsheetUrl;el('paymentList').innerHTML=entries.map(r=>`<div class="item"><strong>${esc(r.userName)}</strong> ／ ${esc(r.eventName)} <span class="pill">${esc(r.paymentStatus||'未入金')}</span><br><span class="muted">受付 ${esc(date(r.timestamp))}</span><br><button data-pay-user="${esc(r.userId)}" data-pay-event="${esc(r.eventId)}" data-paid="${r.paymentStatus==='入金済み'?'false':'true'}">${r.paymentStatus==='入金済み'?'入金確認を取り消す':'入金済みにする'}</button></div>`).join('')||'集金の受付記録はありません。'}
 function renderUsers(){const q=el('userSearch').value.toLowerCase();el('userList').innerHTML=state.users.filter(u=>(u.userName+' '+u.userId).toLowerCase().includes(q)).map(u=>`<div class="item"><strong>${esc(u.userName)}</strong> <span class="muted small">${esc(u.userId)}</span><br>スタンプ ${u.stampCount} ／ 獲得 ${u.earnedBonus} ／ 使用済み ${u.redeemedBonus} ／ 利用可能 <strong>${u.availableBonus}</strong><br><button data-redeem="${esc(u.userId)}" ${u.availableBonus<1?'disabled':''}>特典を1個使用済みにする</button></div>`).join('')||'該当者なし'}
 function renderFilters(){const selected=el('filterEvent').value;const ids=[...new Set(state.records.map(r=>String(r.eventId)))];el('filterEvent').innerHTML='<option value="">すべて</option>'+ids.map(id=>`<option value="${esc(id)}">${esc(state.events.find(e=>String(e.eventId)===id)?.eventName||state.records.find(r=>String(r.eventId)===id)?.eventName||id)}（${esc(id)}）</option>`).join('');el('filterEvent').value=selected}
@@ -132,6 +163,20 @@ el('activityName').oninput=()=>{const name=el('activityName').value.trim();el('a
 el('addActivity').onclick=async()=>{const name=el('activityName').value.trim(),code=el('activityCode').value.trim().toLowerCase();if(!name||!/^[a-z]{2,32}$/.test(code)){status('活動名と英小文字2〜32文字のコードを入力してください。',true);return}await run('activityAdd',{name,code},'活動の種類を登録しました。');if(state.activityTypes.some(a=>a.name===name&&a.code===code)){el('activityName').value='';el('activityCode').value=''}};
 el('seedActivities').onclick=async()=>{el('seedActivities').disabled=true;try{await api('activitySeed');await refresh();status('活動一覧を更新しました。過去の記録は残っています。')}catch(e){status(e.message,true)}finally{el('seedActivities').disabled=false}};
 el('noticeEvent').onchange=fillNotice;
+el('createNoticeEvent').onclick=async()=>{
+ const selected=el('noticeEvent').value,code=selected.startsWith('activity:')?selected.slice(9):'';
+ const activity=state.activityTypes.find(a=>String(a.code)===code);
+ if(!activity){status('活動を選択してください。',true);return}
+ const purpose=el('noticePurpose').value.trim();
+ if(code==='shuukin'&&!purpose){status('集金の種類を入力してください。',true);return}
+ const yes=await confirmAction('本日のイベントを作成',`${activity.name}${purpose?'：'+purpose:''} のイベントを作成します。QRは後から発行します。`);
+ if(!yes)return;
+ try{
+  const created=await api('eventCreate',{eventName:activity.name,activityCode:code,collectionPurpose:purpose,stampMode:code==='shuukin'?'off':'on',validHours:Number(el('validHours').value)});
+  await refresh();el('noticeEvent').value=created.eventId;fillNotice();
+  status('イベントを作成しました。開催案内を入力して「お知らせを保存」を押してください。');
+ }catch(error){status(error.message,true)}
+};
 el('saveNotice').onclick=async()=>{const eventId=el('noticeEvent').value;if(!eventId){status('イベントを選択してください。',true);return}const local=el('noticeStartsAt').value;await run('eventNoticeUpdate',{eventId,startsAt:local?new Date(local).toISOString():'',location:el('noticeLocation').value.trim(),belongings:el('noticeBelongings').value.trim()},'お知らせを保存しました。')};
 el('manualCheckin').onclick=async()=>{const eventId=el('rosterEvent').value,userId=el('manualUser').value;const e=state.events.find(x=>String(x.eventId)===eventId),r=state.registrations.find(x=>String(x.eventId)===eventId&&String(x.userId)===userId);if(!e||!r){status('イベントと未受付の参加者を選択してください。',true);return}const yes=await confirmAction('手動で受付',`${r.userName}さん ／ ${e.eventName}。${e.stampMode==='on'?'スタンプを1個付与します。':'参加記録のみです。'} この操作は取り消しできません。`);if(yes)await run('manualCheckin',{eventId,userId},'手動受付を記録しました。')};
 el('rosterEvent').onchange=()=>{el('rosterUsers').replaceChildren();renderRoster()};
