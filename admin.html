@@ -52,9 +52,40 @@ nav{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 18px}
 nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;border-radius:999px;color:#09695d;box-shadow:0 2px 7px #085e5112}
 .roster-choices{border-radius:12px;border-color:#c8ddd5}
 @media(max-width:600px){.box{padding:20px 17px}button{max-width:100%;white-space:normal}#eventList button{margin-top:8px}header h1{font-size:24px}}
+
+.home{background:linear-gradient(160deg,#fff,#f9fdfb);border-top:4px solid #0d806e}
+.home h2{margin-bottom:6px}
+.home .welcome{margin:0 0 18px;font-size:17px;color:#326960}
+.home .welcome strong{color:#075b52}
+.home h3{margin:20px 0 12px}
+.menu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.menu-grid button,.menu-grid a{min-width:0;width:100%;min-height:70px;margin:0;display:flex;gap:8px;align-items:center;justify-content:flex-start;text-align:left;padding:12px 14px;background:#eaf6f1;color:#075d54;border:1px solid #cee7dc;border-radius:14px;box-shadow:none;font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.menu-grid button:focus-visible,.menu-grid a:focus-visible{outline:3px solid #2ea68d;outline-offset:2px}
+.menu-grid a{flex-wrap:wrap;align-content:center}
+.menu-grid a small{display:block;flex-basis:100%;margin-left:23px;color:#527c75;font-size:11px;font-weight:500}
+#adminEntry button{height:100%}
+#homeMenu #sheetLink,#homeMenu #homeCollectionLink{display:flex;background:#eaf6f1;color:#075d54;padding:10px 14px;border:1px solid #cee7dc;border-radius:14px;margin:0;text-decoration:none}
+.back-home{background:#e5f4ee;color:#0a6759;box-shadow:none;margin:0 0 16px}
+@media(max-width:430px){.menu-grid{gap:8px}.menu-grid button,.menu-grid a{padding:10px;font-size:13px;min-height:66px}.menu-grid a small{margin-left:0}}
 </style></head><body><header><div class="header-inner"><h1><span aria-hidden="true">🏸</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
-<nav aria-label="管理メニュー"><a href="#events">イベント</a><a href="#live">受付中</a><a href="#roster">未受付者</a><a href="#notices">お知らせ</a><a href="#users">参加者・特典</a><a href="#eventStats">集計</a></nav>
-<section class="box" id="events"><h2>イベント</h2>
+<section class="box home" id="homeScreen">
+  <h2>管理者ホーム</h2><p class="welcome">こんにちは、<strong id="adminGreeting">管理者</strong>さん</p>
+  <h3>ダッシュボード</h3><div class="stats" id="stats"></div>
+  <h3>メニュー</h3><div class="menu-grid" id="homeMenu">
+    <button type="button" data-screen="events">▦ <span>イベント</span></button>
+    <button type="button" data-screen="roster">◉ <span>未受付者の確認</span></button>
+    <button type="button" data-screen="live">● <span>受付中のイベント</span></button>
+    <button type="button" data-screen="notices">◈ <span>参加者へのお知らせ</span></button>
+    <button type="button" data-screen="users">♧ <span>参加者・特典管理</span></button>
+    <button type="button" data-screen="payments">￥ <span>集金の入金確認</span></button>
+    <button type="button" data-screen="historyHub">◷ <span>履歴を確認</span></button>
+    <button type="button" data-screen="eventStats">▥ <span>イベント集計</span></button>
+    <div id="adminEntry" hidden><button id="openAdmins" type="button">⚙ <span>管理者管理</span></button></div>
+    <a id="sheetLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>CircleStamp-Records</span><small>スプレッドシート</small></a>
+    <a id="homeCollectionLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>集金記録</span><small>スプレッドシート</small></a>
+  </div>
+</section>
+<section class="box" id="events" hidden><h2>イベント</h2>
 <h3>本日のイベントを作成</h3>
 <label>イベント名を選ぶ<select id="activityChoices"><option value="">選択してください</option></select></label>
 <div id="newEventNameWrap" hidden><label>新しいイベント名<input id="eventActivityName" placeholder="例：バドミントン" autocomplete="off" maxlength="80"></label></div>
@@ -73,14 +104,15 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 <p class="muted help">更新後もイベントIDとイベント名は変わりません。QRは再発行され、以前のQRは無効になります。受付停止中なら停止は継続します。</p></div>
 <div id="qr"></div><div id="eventList"></div>
 <button id="openActivities" type="button" class="subtle">活動の種類を登録・管理</button></section>
-<section class="box" id="live"><h2>受付中のイベント</h2><button id="refreshLive" type="button">参加人数を更新</button><p class="muted">残り時間は画面上で更新します。参加人数は「参加人数を更新」で再取得します。</p><div id="liveList"></div></section>
-<section class="box" id="roster"><h2>未受付者の確認</h2>
+<section class="box" id="roster" hidden><h2>未受付者の確認</h2>
 <label>イベント<select id="rosterEvent"></select></label>
 <p>参加予定者を選択（複数可）</p><div id="rosterUsers" class="roster-choices"></div><button id="addRegistrant" type="button">選択した人を参加予定に登録</button>
 <p class="muted">マイページを開いた人や参加履歴のある人を選べます。</p><div id="rosterList"></div>
 <h3>QRを読めない人の手動受付</h3><p class="muted">受付中のイベントで、参加予定に登録済みの未受付者を選んでください。集金は未入金で記録します。</p>
 <label>受付する人<select id="manualUser"></select></label><button id="manualCheckin" type="button">手動で受付する</button></section>
-<section class="box" id="notices"><h2>参加者へのお知らせ</h2><p class="muted">参加予定に登録した人のマイページに表示します。未入力の項目は表示されません。</p>
+<section class="box" id="live" hidden><h2>受付中のイベント</h2><button id="refreshLive" type="button">参加人数を更新</button><p class="muted">残り時間は画面上で更新します。参加人数は「参加人数を更新」で再取得します。</p><div id="liveList"></div></section>
+
+<section class="box" id="notices" hidden><h2>参加者へのお知らせ</h2><p class="muted">参加予定に登録した人のマイページに表示します。未入力の項目は表示されません。</p>
 <label>活動・イベントを選ぶ<select id="noticeEvent"></select></label>
 <p id="noticeSelectionHint" class="muted"></p>
 <div id="noticeCreate" hidden><p class="muted">この活動で本日のイベントを作成すると、お知らせを登録できます。QRは後から発行します。</p>
@@ -91,21 +123,24 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 <label>持ち物<input id="noticeBelongings" maxlength="300" placeholder="例：室内シューズ、飲み物"></label>
 <button id="saveNotice" type="button">お知らせを保存</button></section>
 
-<section class="box"><h2>ダッシュボード</h2><div class="stats" id="stats"></div><a id="sheetLink" href="#" target="_blank" rel="noopener noreferrer" hidden>スプレッドシートを開く</a></section>
 
-<section class="box" id="payments"><h2>集金の入金確認</h2><p class="muted">QR受付後に、実際の入金を確認してから確定してください。</p><a id="collectionSheetLink" target="_blank" rel="noopener noreferrer" hidden>集金用スプレッドシートを開く</a><div id="paymentSummary"></div><div id="paymentList"></div></section>
-<section class="box" id="users"><h2>参加者・特典管理</h2><input id="userSearch" placeholder="名前・ユーザーIDを検索"><div id="userList"></div></section>
-<section class="box"><button type="button" id="openHistory">参加履歴・訂正履歴を確認</button></section>
+
+<section class="box" id="payments" hidden><h2>集金の入金確認</h2><p class="muted">QR受付後に、実際の入金を確認してから確定してください。</p><a id="collectionSheetLink" target="_blank" rel="noopener noreferrer" hidden>集金用スプレッドシートを開く</a><div id="paymentSummary"></div><div id="paymentList"></div></section>
+<section class="box" id="users" hidden><h2>参加者・特典管理</h2><input id="userSearch" placeholder="名前・ユーザーIDを検索"><div id="userList"></div></section>
+
+<section class="box" id="historyHub" hidden><h2>履歴を確認</h2>
+<p class="muted">記録の種類を選んでください。</p>
+<div class="menu-grid"><button type="button" id="openHistory">参加履歴・スタンプ訂正履歴</button><button type="button" id="openOperations">操作履歴</button></div></section>
 <section class="box" id="history" hidden><button type="button" id="closeHistory" class="subtle">← 閉じる</button><h2>参加履歴・訂正履歴</h2>
 <div class="grid"><label>イベント<select id="filterEvent"><option value="">すべて</option></select></label><label>種別<select id="filterMode"><option value="">すべて</option><option value="on">スタンプ付与</option><option value="off">参加のみ</option><option value="revoked">訂正済み</option></select></label><label>開始日<input type="date" id="dateFrom"></label><label>終了日<input type="date" id="dateTo"></label></div>
 <input id="historySearch" placeholder="参加者名・ユーザーID・イベント名で検索">
 <button id="csvRecords">表示中の履歴CSV</button><button id="csvBonus">特典CSV</button>
 <p id="recordCount" class="muted"></p><div id="recordList"></div>
 <h3>スタンプ訂正の操作履歴</h3><div id="correctionList"></div></section>
-<section class="box" id="eventStats"><h2>イベント集計</h2><div id="eventStatsList"></div></section>
-<section class="box"><button type="button" id="openOperations">操作履歴を確認</button></section>
+<section class="box" id="eventStats" hidden><h2>イベント集計</h2><div id="eventStatsList"></div></section>
+
 <section class="box" id="operations" hidden><button type="button" id="closeOperations" class="subtle">← 閉じる</button><h2>操作履歴</h2><label>操作・対象・操作者を検索<input id="operationSearch" placeholder="キーワードを入力"></label><div id="operationList"></div></section>
-<section class="box" id="adminEntry" hidden><button type="button" id="openAdmins">管理者管理</button></section>
+
 <section class="box" id="admins" hidden><button type="button" id="closeAdmins" class="subtle">← 閉じる</button><h2>管理者管理</h2><p class="muted help">参加履歴のある人から追加できます。本人が自身のLINEで管理画面を開けるようになります。</p>
 <label>新しい管理者<select id="newAdmin"><option value="">選択してください</option></select></label><button id="addAdmin">管理者に追加</button>
 <div id="adminList"></div><h3>変更履歴</h3><div id="adminAuditList"></div></section>
@@ -124,7 +159,8 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script>
 const API='https://script.google.com/macros/s/AKfycbxTYedx5VBpe5BPyIsQx0iNwS_3xZ3EaWfQDDyOGSQhP3TK6J0F-VWRfYvTjaOATawn/exec';
 const LIFF_ID='2011752461-qIktF1m8',STAMP_URL=new URL('stamp/index.html',location.href).href;
-let editEventId=null;
+let editEventId=null,currentScreen='home';
+const featureScreens=['events','roster','live','notices','payments','users','historyHub','history','eventStats','operations','admins'];
 let state={operationAudit:[],activityTypes:[],events:[],records:[],redemptions:[],users:[],corrections:[],eventStats:[],adminUsers:[],adminAudit:[],stats:{}};
 let attendeeCounts=new Map();let qrEvent=null;
 const el=id=>document.getElementById(id);
@@ -134,11 +170,13 @@ const status=(s,error=false)=>{el('status').textContent=s;el('status').className
 const date=v=>{const d=new Date(v);return isNaN(d)?String(v||''):d.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})};
 const day=v=>new Date(v).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 async function api(type,fields={}){const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINE認証が必要です。');const response=await fetch(API,{method:'POST',body:JSON.stringify({type,accessToken,...fields})});const data=await response.json();if(!data.ok)throw Error(data.message||'処理に失敗しました。');return data}
-async function refresh(){state=await api('adminData');attendeeCounts=new Map();for(const r of state.records){const id=String(r.eventId);if(!attendeeCounts.has(id))attendeeCounts.set(id,new Set());attendeeCounts.get(id).add(String(r.userId))}render();status('読み込み完了')}
+async function refresh(){state=await api('adminData');attendeeCounts=new Map();for(const r of state.records){const id=String(r.eventId);if(!attendeeCounts.has(id))attendeeCounts.set(id,new Set());attendeeCounts.get(id).add(String(r.userId))}render();showScreen(currentScreen,false);status('読み込み完了')}
 async function run(type,fields,message){try{await api(type,fields);await refresh();status(message||'保存しました。')}catch(e){status(e.message,true)}}
 function render(){
  renderActivities();renderLive();renderOperations();
- const sheetLink=el('sheetLink');sheetLink.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.spreadsheetUrl||'');if(!sheetLink.hidden)sheetLink.href=state.spreadsheetUrl;
+ const sheetLink=el('sheetLink');sheetLink.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.recordsSheetUrl||'');if(!sheetLink.hidden)sheetLink.href=state.recordsSheetUrl;
+ el('adminGreeting').textContent=state.adminUsers.find(a=>String(a.userId)===String(state.currentAdminId))?.userName||'管理者';
+ const collectionHome=el('homeCollectionLink');collectionHome.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.collectionSheetUrl||'');if(!collectionHome.hidden)collectionHome.href=state.collectionSheetUrl;
  el('stats').innerHTML=[['今日の参加者',state.stats.today],['総登録者',state.stats.registered],['今月の参加者',state.stats.month],['未使用特典',state.stats.available]].map(([n,v])=>`<div class="stat">${n}<br><strong>${v}</strong></div>`).join('');
  el('eventList').innerHTML=state.events.map((ev,i)=>{const draft=ev.status==='draft',paused=ev.status==='paused',expired=!draft&&new Date(ev.expiresAt).getTime()<=Date.now();return `<div class="item"><strong>${esc(ev.eventName)}</strong> <span class="pill ${draft?'draft':paused?'paused':expired?'expired':'open'}">${draft?'QR未発行':paused?'受付停止':expired?'期限切れ':'受付中'}</span><br><span class="muted">${esc(ev.eventId)} ／ ${ev.stampMode==='on'?'スタンプ':'記録のみ'} ／ ${draft?'QR発行後 '+esc(ev.expiresAt)+'時間有効':'期限 '+esc(date(ev.expiresAt))}</span><br>${draft?`<button data-publish="${i}">QRを発行して受付開始</button>`:`<button data-edit="${i}">編集</button><button data-qr="${i}">QR表示</button><button data-toggle="${i}" ${expired&&!paused?'disabled':''}>${paused?'受付再開':'受付停止'}</button>`}<button class="danger" data-delete="${i}">削除</button></div>`}).join('')||'イベントなし';
  renderUsers();renderFilters();renderHistory();renderStats();renderAdmins();renderRoster();renderPayments();renderNotices();
@@ -201,10 +239,23 @@ function confirmAction(title,details,{reason=false}={}){return new Promise(resol
 el('eventActivityName').oninput=previewEvent;
 el('activityChoices').onchange=()=>{el('stampMode').value=chosenActivity()?.code==='shuukin'?'off':'on';previewEvent()};
 el('newActivityCode').oninput=previewEvent;
-function toggleSection(id,show){el(id).hidden=!show;if(show)el(id).scrollIntoView({behavior:'smooth'});else el('open'+id[0].toUpperCase()+id.slice(1)).scrollIntoView({behavior:'smooth'})}
-el('openHistory').onclick=()=>toggleSection('history',true);el('closeHistory').onclick=()=>toggleSection('history',false);
-el('openOperations').onclick=()=>toggleSection('operations',true);el('closeOperations').onclick=()=>toggleSection('operations',false);el('operationSearch').oninput=renderOperations;
-el('openAdmins').onclick=()=>{if(state.canManageAdmins)toggleSection('admins',true)};el('closeAdmins').onclick=()=>toggleSection('admins',false);
+function showScreen(id,scroll=true){
+ if(id!=='home'&&!featureScreens.includes(id))return;
+ if(id==='admins'&&!state.canManageAdmins)id='home';
+ currentScreen=id;
+ el('homeScreen').hidden=id!=='home';
+ featureScreens.forEach(name=>el(name).hidden=name!==id);
+ if(scroll)window.scrollTo({top:0,behavior:'smooth'});
+}
+featureScreens.forEach(id=>{
+ const section=el(id),back=document.createElement('button');
+ back.type='button';back.className='back-home';back.textContent='← ホームに戻る';
+ back.onclick=()=>showScreen('home');section.prepend(back);
+});
+el('homeMenu').onclick=ev=>{const id=ev.target.closest('[data-screen]')?.dataset.screen;if(id)showScreen(id)};
+el('openHistory').onclick=()=>showScreen('history');el('closeHistory').onclick=()=>showScreen('historyHub');
+el('openOperations').onclick=()=>showScreen('operations');el('closeOperations').onclick=()=>showScreen('historyHub');
+el('openAdmins').onclick=()=>{if(state.canManageAdmins)showScreen('admins')};el('closeAdmins').onclick=()=>showScreen('home');
 el('openActivities').onclick=()=>{el('panel').hidden=true;el('activityScreen').hidden=false;scrollTo(0,0)};
 el('closeActivities').onclick=()=>{el('activityScreen').hidden=true;el('panel').hidden=false;el('openActivities').scrollIntoView()};
 el('activityName').oninput=()=>{const name=el('activityName').value.trim();el('activityCode').value=romanize(name)};
@@ -233,7 +284,7 @@ el('rosterList').onclick=async ev=>{const userId=ev.target.closest('button')?.da
 el('paymentList').onclick=async ev=>{const b=ev.target.closest('button');if(!b?.dataset.payUser)return;const paid=b.dataset.paid==='true';const yes=await confirmAction(paid?'入金確認':'入金確認を取り消す',paid?'実際の入金を確認しましたか？':'入金状態を未入金に戻します。');if(yes)await run('paymentConfirm',{eventId:b.dataset.payEvent,userId:b.dataset.payUser,paid},paid?'入金済みにしました。':'未入金に戻しました。')};
 el('refreshLive').onclick=async()=>{try{await refresh();status('参加人数を更新しました。')}catch(e){status(e.message,true)}};setInterval(renderLive,30000);
 el('activityList').onclick=async ev=>{const b=ev.target.closest('button');if(!b)return;const code=b.dataset.activityRename??b.dataset.activityDelete;if(!code)return;if(b.dataset.activityDelete!==undefined&&!state.canManageAdmins)return;if(b.dataset.activityRename!==undefined){const old=state.activityTypes.find(a=>a.code===code);const name=prompt('新しい活動名を入力してください。既存イベントの名前は変更されません。',old.name);if(name!==null)await run('activityRename',{code,name:name.trim()},'活動名を変更しました。');return}const yes=await confirmAction('活動の種類を削除',`${code} を削除します。作成済みイベントがある活動は削除できません。`);if(yes)await run('activityDelete',{code},'活動の種類を削除しました。')};
-el('createEvent').onclick=async()=>{try{const eventName=chosenEventName(),activity=chosenActivity(),activityCode=activity?.code||el('newActivityCode').value.trim().toLowerCase(),collection=activityCode==='shuukin',collectionPurpose=el('collectionPurpose').value.trim();if(!eventName||!/^[a-z]{2,32}$/.test(activityCode))throw Error('イベント名とローマ字コードを確認してください。');if(el('activityChoices').value==='__new__'&&state.activityTypes.some(a=>a.name===eventName))throw Error('登録済みの名前は一覧から選んでください。');if(collection&&!collectionPurpose)throw Error('集金の種類を入力してください。');const result=await api('eventCreate',{eventName,activityCode,collectionPurpose,stampMode:collection?'off':el('stampMode').value,validHours:Number(el('validHours').value)});await refresh();el('rosterEvent').value=result.eventId;renderRoster();el('roster').scrollIntoView({behavior:'smooth'});status('イベントを作成しました。参加予定者を登録した後、QRを発行してください。')}catch(e){status(e.message,true)}};
+el('createEvent').onclick=async()=>{try{const eventName=chosenEventName(),activity=chosenActivity(),activityCode=activity?.code||el('newActivityCode').value.trim().toLowerCase(),collection=activityCode==='shuukin',collectionPurpose=el('collectionPurpose').value.trim();if(!eventName||!/^[a-z]{2,32}$/.test(activityCode))throw Error('イベント名とローマ字コードを確認してください。');if(el('activityChoices').value==='__new__'&&state.activityTypes.some(a=>a.name===eventName))throw Error('登録済みの名前は一覧から選んでください。');if(collection&&!collectionPurpose)throw Error('集金の種類を入力してください。');const result=await api('eventCreate',{eventName,activityCode,collectionPurpose,stampMode:collection?'off':el('stampMode').value,validHours:Number(el('validHours').value)});await refresh();el('rosterEvent').value=result.eventId;renderRoster();showScreen('roster');status('イベントを作成しました。参加予定者を登録した後、QRを発行してください。')}catch(e){status(e.message,true)}};
 el('updateEvent').onclick=async()=>{try{if(!editEventId||!el('editExpiresAt').value)throw Error('イベントと有効期限を確認してください。');const id=editEventId;await api('eventUpdate',{eventId:id,stampMode:el('editStampMode').value,expiresAt:new Date(el('editExpiresAt').value).toISOString()});await refresh();showQR(state.events.find(e=>String(e.eventId)===id));status('更新しました。新しいQRをご利用ください。')}catch(e){status(e.message,true)}};
 el('eventList').onclick=async ev=>{const b=ev.target.closest('button');if(!b)return;const i=b.dataset.edit??b.dataset.qr??b.dataset.toggle??b.dataset.publish??b.dataset.delete,e=state.events[Number(i)];if(!e)return;if(b.dataset.publish!==undefined){const yes=await confirmAction('QRを発行して受付開始',`${e.eventName} のQRを発行します。有効時間は発行時から${e.expiresAt}時間です。`);if(!yes)return;try{await api('eventPublish',{eventId:e.eventId});await refresh();showQR(state.events.find(x=>String(x.eventId)===String(e.eventId)));status('QRを発行し、受付を開始しました。')}catch(error){status(error.message,true)}return}if(b.dataset.edit!==undefined){editEventId=String(e.eventId);el('editEventLabel').textContent=e.eventName+' ／ '+e.eventId;el('editStampMode').value=e.stampMode;el('editStampMode').disabled=String(e.eventId).startsWith('shuukin')&&String(e.eventName).startsWith('集金：');el('editExpiresAt').value=new Date(e.expiresAt).toLocaleString('sv-SE',{timeZone:'Asia/Tokyo'}).slice(0,16);el('editPanel').hidden=false;el('editPanel').scrollIntoView({behavior:'smooth'})}else if(b.dataset.qr!==undefined)showQR(e);else if(b.dataset.toggle!==undefined){const next=e.status==='paused'?'open':'paused';const yes=await confirmAction(next==='paused'?'受付を停止':'受付を再開',`${e.eventName}の受付を${next==='paused'?'停止':'再開'}します。`);if(yes)await run('eventStatus',{eventId:e.eventId,status:next},'受付状態を変更しました。')}else{const yes=await confirmAction('イベントを削除',`${e.eventName}を削除します。参加履歴は残ります。`);if(yes){await run('eventDelete',{eventId:e.eventId},'イベントを削除しました。');if(editEventId===String(e.eventId)){editEventId=null;el('editPanel').hidden=true}}}};
 el('userList').onclick=async ev=>{const uid=ev.target.closest('button')?.dataset.redeem;if(!uid)return;const u=state.users.find(x=>String(x.userId)===uid);const yes=await confirmAction('特典の使用を確定',`${u.userName}さん ／ 利用可能 ${u.availableBonus}個 → 使用後 ${u.availableBonus-1}個。特典を渡したことを確認してください。`);if(yes)await run('redeem',{userId:uid},'特典を使用済みにしました。')};
