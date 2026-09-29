@@ -156,6 +156,34 @@ main{margin:0 auto 30px}
 #homeScreen #calendar #calendarDayLabel{margin:19px 0 8px;font-size:16px}
 #homeScreen #calendar #addPlan{margin-top:14px}
 #homeScreen h3:not(.sr-only){margin-top:27px}
+
+/* C案：予定名が見えるホームカレンダー */
+#homeScreen #calendar{background:linear-gradient(140deg,#edf9f2,#e5f5ed);border:1px solid #f9fffc;border-radius:23px;padding:20px 16px;box-shadow:0 10px 28px #12614e12}
+#calendar .calendar-toolbar{justify-content:space-between;margin:12px 0 10px}
+#calendar .calendar-toolbar strong{font-size:21px;color:#073c36}
+#calendar .calendar-toolbar button{background:transparent;color:#075c50;border:0;box-shadow:none;font-size:26px;min-width:38px}
+#calendar .calendar-grid{gap:4px}
+#calendar .weekday{padding:7px 0;font-weight:650;font-size:13px;color:#254c44}
+#calendar .calendar-grid button{min-width:0;min-height:85px;align-items:stretch;justify-content:flex-start;gap:4px;padding:6px 3px;background:#ffffffec;border:1px solid #ffffff;border-radius:9px;box-shadow:none;color:#193e38;font-weight:500}
+.calendar-number{display:block;text-align:center;font-size:15px;line-height:1.3}
+#calendar .sunday .calendar-number,#calendar .weekday.sunday{color:#d83d4c}
+#calendar .saturday .calendar-number,#calendar .weekday.saturday{color:#316ac6}
+#calendar .calendar-grid button.outside .calendar-number{color:#a0b3ad}
+#calendar .calendar-grid button.today:not(.selected){border-color:#158e71;box-shadow:inset 0 0 0 1px #158e71}
+#calendar .calendar-grid button.selected{background:linear-gradient(140deg,#09765e,#064c42);color:#fff;border-color:#0a725e;box-shadow:0 3px 7px #075c4933}
+#calendar .calendar-grid button.selected .calendar-number{color:#fff;font-weight:750}
+.calendar-badges{display:grid;gap:3px;min-width:0}.calendar-badge{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:4px;padding:3px 2px;font-size:10px;line-height:1.2;font-weight:600;text-align:center;background:#c9efdf;color:#125947}
+.calendar-badge.tone-1{background:#f7e6b3;color:#6b511c}.calendar-badge.tone-2{background:#dce6ff;color:#29559d}
+.calendar-more{font-size:9px;color:inherit;text-align:center}
+#homeScreen #calendar #calendarDayLabel{border-top:1px solid #cce5d7;padding-top:16px;margin-top:17px;font-size:17px}
+#calendar .calendar-plan{border:0;border-left:4px solid #14836b;background:#fff;border-radius:13px;padding:13px 14px;margin:10px 0;box-shadow:0 3px 9px #105b4310}
+#calendar .calendar-plan.tone-1{border-left-color:#bc973d}#calendar .calendar-plan.tone-2{border-left-color:#5483c3}
+.calendar-plan-meta{display:flex;gap:5px 12px;flex-wrap:wrap;color:#57746b;font-size:12px;margin-top:6px;line-height:1.6}
+.calendar-plan-memo{font-size:13px;color:#38584f;margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.calendar-plan-actions button{min-height:30px;padding:5px 9px;font-size:12px}
+.calendar-empty{font-size:13px;color:#6a8178;padding:8px 0}
+#homeScreen #calendar #addPlan{width:100%;border-radius:999px;background:linear-gradient(110deg,#086751,#0a7d64);padding:12px;font-size:15px;box-shadow:0 4px 10px #0b705320}
+@media(max-width:430px){#homeScreen #calendar{padding:18px 10px}#calendar .calendar-grid{gap:3px}#calendar .calendar-grid button{min-height:75px;padding:5px 2px;gap:3px}.calendar-number{font-size:13px}.calendar-badge{font-size:9px;padding:3px 1px}#calendar .calendar-toolbar strong{font-size:19px}}
 </style></head><body><header><div class="header-inner"><h1><span class="brand-mark" aria-hidden="true">M</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
 <section class="box home" id="homeScreen">
   <h2 class="sr-only">管理者ホーム</h2><p class="welcome">こんにちは、<strong id="adminGreeting">管理者</strong>さん</p><p class="home-intro">いつも運営ありがとうございます。</p>
@@ -273,11 +301,11 @@ let attendeeCounts=new Map();let qrEvent=null;
 const el=id=>document.getElementById(id);
 el('reloadApp').onclick=()=>{const url=new URL('admin.html',location.href);url.searchParams.set('refresh',Date.now().toString());location.replace(url.href)};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const status=(s,error=false)=>{el('status').textContent=s;el('status').className=error?'error':''};
+const status=(s,error=false)=>{el('status').textContent=s;el('status').className=error?'error':'';el('status').hidden=!s};
 const date=v=>{const d=new Date(v);return isNaN(d)?String(v||''):d.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})};
 const day=v=>new Date(v).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 async function api(type,fields={}){const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINE認証が必要です。');const response=await fetch(API,{method:'POST',body:JSON.stringify({type,accessToken,...fields})});const data=await response.json();if(!data.ok)throw Error(data.message||'処理に失敗しました。');return data}
-async function refresh(){state=await api('adminData');attendeeCounts=new Map();for(const r of state.records){const id=String(r.eventId);if(!attendeeCounts.has(id))attendeeCounts.set(id,new Set());attendeeCounts.get(id).add(String(r.userId))}render();showScreen(currentScreen,false);status('読み込み完了')}
+async function refresh(){state=await api('adminData');attendeeCounts=new Map();for(const r of state.records){const id=String(r.eventId);if(!attendeeCounts.has(id))attendeeCounts.set(id,new Set());attendeeCounts.get(id).add(String(r.userId))}render();showScreen(currentScreen,false);status('')}
 async function run(type,fields,message){try{await api(type,fields);await refresh();status(message||'保存しました。')}catch(e){status(e.message,true)}}
 const statIcons={"calendar": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"6\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M8 3v6M16 3v6M4 11h16\"/></svg>", "people": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1\"/></svg>", "chart": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 20V11h4v9M10 20V4h4v16M16 20v-7h4v7M3 20h18\"/></svg>", "gift": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"11\" rx=\"1\"/><path d=\"M3 10h18M12 10v11M12 10c-7-1-7-7-4-7 2 0 4 3 4 7zm0 0c7-1 7-7 4-7-2 0-4 3-4 7z\"/></svg>"};
 function render(){
@@ -330,9 +358,28 @@ function renderPayments(){
  const link=el('collectionSheetLink');link.hidden=!state.collectionSpreadsheetUrl;if(!link.hidden)link.href=state.collectionSpreadsheetUrl;
  el('paymentList').innerHTML=state.records.filter(r=>r.collection).slice().reverse().map(r=>`<div class="item"><strong>${esc(r.userName)}</strong> ／ ${esc(r.eventName)} <span class="pill">集金済み</span><br><span class="muted">受付 ${esc(date(r.timestamp))}</span></div>`).join('')||'集金済みの受付記録はありません。';
 }
-let calendarMonth=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo'}));calendarMonth.setDate(1);let selectedCalendarDay='';
+let calendarMonth=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo'}));calendarMonth.setDate(1);let selectedCalendarDay=calendarDay(new Date());
 function calendarDay(v){return new Date(v).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'})}
-function renderCalendar(){const plans=(state.calendarPlans||[]).slice().sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt));const year=calendarMonth.getFullYear(),month=calendarMonth.getMonth(),first=new Date(year,month,1).getDay(),days=new Date(year,month+1,0).getDate();el('calendarMonth').textContent=`${year}年${month+1}月`;const labels=['日','月','火','水','木','金','土'].map(d=>`<span class="weekday">${d}</span>`).join('');const cells=Array.from({length:first},()=>'<span></span>').join('')+Array.from({length:days},(_,i)=>{const day=`${year}-${String(month+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;const count=plans.filter(p=>calendarDay(p.startsAt)===day).length;return `<button type="button" data-calendar-day="${day}" class="${day===selectedCalendarDay?'selected':''}" aria-label="${day}、予定${count}件">${i+1}${count?'<span class="calendar-dot" aria-hidden="true"></span>':''}</button>`}).join('');el('calendarGrid').innerHTML=labels+cells;const monthPrefix=`${year}-${String(month+1).padStart(2,'0')}`;el('calendarDayLabel').textContent=selectedCalendarDay?`${selectedCalendarDay}の予定`:`${year}年${month+1}月の予定`;const visible=plans.filter(p=>selectedCalendarDay?calendarDay(p.startsAt)===selectedCalendarDay:calendarDay(p.startsAt).startsWith(monthPrefix));el('calendarList').innerHTML=visible.map(p=>`<div class="item"><strong>${esc(p.title)}</strong><br><span class="muted">${esc(date(p.startsAt))}${p.endsAt?' 〜 '+esc(date(p.endsAt)):''}${p.location?' ／ '+esc(p.location):''}</span>${p.memo?`<p>${esc(p.memo)}</p>`:''}${state.canEditCalendar?`<br><button type="button" class="subtle" data-plan-edit="${esc(p.planId)}">編集</button><button type="button" class="danger" data-plan-delete="${esc(p.planId)}">削除</button>`:''}</div>`).join('')||'予定はありません。';el('addPlan').hidden=!state.canEditCalendar;if(!state.canEditCalendar)el('calendarEditor').hidden=true;}
+function planTone(plan){return [...String(plan.planId||plan.title)].reduce((n,c)=>n+c.charCodeAt(0),0)%3}
+function renderCalendar(){
+ const plans=(state.calendarPlans||[]).slice().sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt));
+ const year=calendarMonth.getFullYear(),month=calendarMonth.getMonth(),first=new Date(year,month,1).getDay(),days=new Date(year,month+1,0).getDate();
+ el('calendarMonth').textContent=`${year}年 ${month+1}月`;
+ const labels=['日','月','火','水','木','金','土'].map((d,i)=>`<span class="weekday ${i===0?'sunday':i===6?'saturday':''}">${d}</span>`).join('');
+ const total=Math.ceil((first+days)/7)*7,today=calendarDay(new Date());
+ const cells=Array.from({length:total},(_,i)=>{
+  const cellDate=new Date(year,month,i-first+1),day=`${cellDate.getFullYear()}-${String(cellDate.getMonth()+1).padStart(2,'0')}-${String(cellDate.getDate()).padStart(2,'0')}`,outside=cellDate.getMonth()!==month;
+  const matches=plans.filter(p=>calendarDay(p.startsAt)===day);
+  const classes=[day===selectedCalendarDay?'selected':'',outside?'outside':'',i%7===0?'sunday':i%7===6?'saturday':'',day===today?'today':''].filter(Boolean).join(' ');
+  return `<button type="button" data-calendar-day="${day}" class="${classes}" aria-pressed="${day===selectedCalendarDay}" aria-label="${day}、予定${matches.length}件"><span class="calendar-number">${cellDate.getDate()}</span><span class="calendar-badges">${matches.slice(0,2).map(p=>`<span class="calendar-badge tone-${planTone(p)}" title="${esc(p.title)}">${esc(p.title)}</span>`).join('')}${matches.length>2?`<span class="calendar-more">＋${matches.length-2}件</span>`:''}</span></button>`;
+ }).join('');
+ el('calendarGrid').innerHTML=labels+cells;
+ const monthPrefix=`${year}-${String(month+1).padStart(2,'0')}`;
+ const visible=plans.filter(p=>selectedCalendarDay?calendarDay(p.startsAt)===selectedCalendarDay:calendarDay(p.startsAt).startsWith(monthPrefix));
+ el('calendarDayLabel').textContent=selectedCalendarDay?`${Number(selectedCalendarDay.slice(5,7))}月${Number(selectedCalendarDay.slice(8))}日の予定（${visible.length}件）`:`${year}年${month+1}月の予定（${visible.length}件）`;
+ el('calendarList').innerHTML=visible.map(p=>`<div class="item calendar-plan tone-${planTone(p)}"><strong>${esc(p.title)}</strong><div class="calendar-plan-meta"><span>◷ ${esc(date(p.startsAt))}${p.endsAt?' 〜 '+esc(date(p.endsAt)):''}</span>${p.location?`<span>⌖ ${esc(p.location)}</span>`:''}</div>${p.memo?`<p class="calendar-plan-memo">${esc(p.memo)}</p>`:''}${state.canEditCalendar?`<div class="calendar-plan-actions"><button type="button" class="subtle" data-plan-edit="${esc(p.planId)}">編集</button><button type="button" class="danger" data-plan-delete="${esc(p.planId)}">削除</button></div>`:''}</div>`).join('')||'<p class="calendar-empty">この日の予定はありません。</p>';
+ el('addPlan').hidden=!state.canEditCalendar;if(!state.canEditCalendar)el('calendarEditor').hidden=true;
+}
 function clearPlan(){for(const id of ['planId','planTitle','planStartsAt','planEndsAt','planLocation','planMemo'])el(id).value=''}
 function renderUsers(){const q=el('userSearch').value.toLowerCase();el('userList').innerHTML=state.users.filter(u=>(u.userName+' '+u.userId).toLowerCase().includes(q)).map(u=>`<div class="item"><strong>${esc(u.userName)}</strong> <span class="muted small">${esc(u.userId)}</span><br>スタンプ ${u.stampCount} ／ 獲得 ${u.earnedBonus} ／ 使用済み ${u.redeemedBonus} ／ 利用可能 <strong>${u.availableBonus}</strong><br><button data-redeem="${esc(u.userId)}" ${u.availableBonus<1?'disabled':''}>特典を1個使用済みにする</button></div>`).join('')||'該当者なし'}
 function renderFilters(){const selected=el('filterEvent').value;const ids=[...new Set(state.records.map(r=>String(r.eventId)))];el('filterEvent').innerHTML='<option value="">すべて</option>'+ids.map(id=>`<option value="${esc(id)}">${esc(state.events.find(e=>String(e.eventId)===id)?.eventName||state.records.find(r=>String(r.eventId)===id)?.eventName||id)}（${esc(id)}）</option>`).join('');el('filterEvent').value=selected}
@@ -403,9 +450,9 @@ el('manualCheckin').onclick=async()=>{const eventId=el('rosterEvent').value,user
 el('rosterEvent').onchange=()=>{el('rosterUsers').replaceChildren();renderRoster()};
 el('addRegistrant').onclick=async()=>{const eventId=el('rosterEvent').value,ids=[...el('rosterUsers').querySelectorAll('input:checked')].map(input=>input.value);if(!eventId||!ids.length){status('イベントと参加者を選択してください。',true);return}const button=el('addRegistrant');button.disabled=true;let added=0;const failed=[];try{for(const userId of ids){try{await api('registrationAdd',{eventId,userId});added++}catch(error){const name=state.users.find(u=>String(u.userId)===userId)?.userName||userId;failed.push(`${name}：${error.message}`)}}await refresh();status(failed.length?`${added}人を登録。失敗 ${failed.length}人：${failed.join(' ／ ')}`:`${added}人を参加予定に登録しました。`,!!failed.length)}catch(error){status(`${added}人を登録しましたが、再読み込みに失敗しました：${error.message}`,true)}finally{button.disabled=false}};
 el('rosterList').onclick=async ev=>{const userId=ev.target.closest('button')?.dataset.unregister,eventId=el('rosterEvent').value;if(!userId||!eventId)return;const yes=await confirmAction('参加予定から外す','参加記録は削除されません。');if(yes)await run('registrationRemove',{eventId,userId},'参加予定から外しました。')};
-el('calendarPrev').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);selectedCalendarDay='';renderCalendar()};
-el('calendarNext').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);selectedCalendarDay='';renderCalendar()};
-el('calendarGrid').onclick=ev=>{const day=ev.target.closest('[data-calendar-day]')?.dataset.calendarDay;if(day){selectedCalendarDay=selectedCalendarDay===day?'':day;renderCalendar()}};
+el('calendarPrev').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()-1);selectedCalendarDay=`${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth()+1).padStart(2,'0')}-01`;renderCalendar()};
+el('calendarNext').onclick=()=>{calendarMonth.setMonth(calendarMonth.getMonth()+1);selectedCalendarDay=`${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth()+1).padStart(2,'0')}-01`;renderCalendar()};
+el('calendarGrid').onclick=ev=>{const day=ev.target.closest('[data-calendar-day]')?.dataset.calendarDay;if(day){selectedCalendarDay=day;calendarMonth=new Date(Number(day.slice(0,4)),Number(day.slice(5,7))-1,1);renderCalendar()}};
 el('clearPlan').onclick=()=>{clearPlan();el('calendarEditor').hidden=true};
 el('addPlan').onclick=()=>{if(!state.canEditCalendar)return;clearPlan();el('calendarEditor').hidden=false;el('calendarEditor').scrollIntoView({behavior:'smooth'})};
 el('calendarList').onclick=async ev=>{const button=ev.target.closest('button');if(!button||!state.canEditCalendar)return;const id=button.dataset.planEdit??button.dataset.planDelete,p=(state.calendarPlans||[]).find(x=>String(x.planId)===id);if(!p)return;if(button.dataset.planDelete!==undefined){const yes=await confirmAction('予定を削除',`${p.title} ／ ${date(p.startsAt)} を削除します。`);if(yes)await run('calendarDelete',{planId:id},'予定を削除しました。');return}el('planId').value=p.planId;el('planTitle').value=p.title;el('planStartsAt').value=new Date(p.startsAt).toLocaleString('sv-SE',{timeZone:'Asia/Tokyo'}).slice(0,16);el('planEndsAt').value=p.endsAt?new Date(p.endsAt).toLocaleString('sv-SE',{timeZone:'Asia/Tokyo'}).slice(0,16):'';el('planLocation').value=p.location||'';el('planMemo').value=p.memo||'';el('calendarEditor').hidden=false;el('calendarEditor').scrollIntoView({behavior:'smooth'})};
