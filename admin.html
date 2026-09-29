@@ -53,6 +53,7 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 .roster-choices{border-radius:12px;border-color:#c8ddd5}
 @media(max-width:600px){.box{padding:20px 17px}button{max-width:100%;white-space:normal}#eventList button{margin-top:8px}header h1{font-size:24px}}
 </style></head><body><header><div class="header-inner"><h1><span aria-hidden="true">🏸</span> MatchPoint <span>管理</span></h1><button id="reloadApp" class="subtle" type="button">↻ アプリを更新</button></div></header><main><p id="status" role="status">確認中...</p><div id="panel" hidden>
+<nav aria-label="管理メニュー"><a href="#events">イベント</a><a href="#live">受付中</a><a href="#roster">未受付者</a><a href="#notices">お知らせ</a><a href="#users">参加者・特典</a><a href="#eventStats">集計</a></nav>
 <section class="box" id="events"><h2>イベント</h2>
 <h3>本日のイベントを作成</h3>
 <label>イベント名を選ぶ<select id="activityChoices"><option value="">選択してください</option></select></label>
@@ -89,7 +90,7 @@ nav a{font-size:13px;text-decoration:none;background:#ffffffde;padding:8px 10px;
 <label>場所<input id="noticeLocation" maxlength="120" placeholder="例：体育館"></label>
 <label>持ち物<input id="noticeBelongings" maxlength="300" placeholder="例：室内シューズ、飲み物"></label>
 <button id="saveNotice" type="button">お知らせを保存</button></section>
-<nav aria-label="管理メニュー"><a href="#events">イベント</a><a href="#live">受付中</a><a href="#roster">未受付者</a><a href="#notices">お知らせ</a><a href="#users">参加者・特典</a><a href="#eventStats">集計</a></nav>
+
 <section class="box"><h2>ダッシュボード</h2><div class="stats" id="stats"></div><a id="sheetLink" href="#" target="_blank" rel="noopener noreferrer" hidden>スプレッドシートを開く</a></section>
 
 <section class="box" id="payments"><h2>集金の入金確認</h2><p class="muted">QR受付後に、実際の入金を確認してから確定してください。</p><a id="collectionSheetLink" target="_blank" rel="noopener noreferrer" hidden>集金用スプレッドシートを開く</a><div id="paymentSummary"></div><div id="paymentList"></div></section>
