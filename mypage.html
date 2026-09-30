@@ -5,74 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>スタンプカード | MatchPoint</title>
   <style>
-    :root{font-family:system-ui,sans-serif;color:#17324c}
-    body{margin:0;background:#eef8f7}
-    .header{background:#168b77;color:#fff;text-align:center;padding:22px}
-    main{max-width:680px;margin:20px auto;padding:0 16px}
-    .card{background:#fff;padding:20px;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 18px #17324c12}
-    .shop{background:linear-gradient(140deg,#07565b,#13877b 70%,#32a497);color:#fff;position:relative;overflow:hidden;padding:26px;box-shadow:0 12px 28px #07565b35}.shop::after{content:"";position:absolute;width:170px;height:170px;right:-65px;top:-70px;border:2px solid #ffffff35;border-radius:50%;pointer-events:none}.shop .muted{color:#dbf4ec}.shop h2{margin:0 0 18px;font-size:18px}.shop .big{font-size:28px}.shop .stamp{border-color:#e7faf2;color:#f3fff9;background:#ffffff20}.shop .stamp.on{background:#fff;color:#087a71}.shop .stamps{justify-content:flex-start}.shop .bonus{display:inline-block;background:#ffffffec;color:#07565b;padding:9px 14px;border-radius:22px;font-weight:700}.shop p{line-height:1.5}.tools{display:flex;gap:10px;align-items:center;margin:0 0 14px}.refresh-button{width:auto!important;padding:7px 12px!important;font-size:13px!important;white-space:nowrap}.upcoming .notice{margin-top:8px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.upcoming .item{padding:13px 0;border-top:1px solid #e5eeee}.upcoming .pill{background:#e6f5f0;color:#087763;border-radius:20px;padding:4px 9px;font-size:13px}.upcoming .pill.done{background:#edf1f3;color:#536977}
-    .stamps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:20px 0}
-    .stamp{width:42px;height:42px;border-radius:50%;border:2px solid #168b77;display:grid;place-items:center;color:#168b77;font-size:24px}
-    .stamp.on{background:#168b77;color:#fff}
-    .big{font-size:22px;font-weight:700}
-    .record{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:13px 0;border-top:1px solid #e5eeee}.record strong{overflow-wrap:anywhere}.month{margin:22px 0 8px;color:#168b77}.tag{white-space:nowrap;padding:4px 8px;border-radius:8px;background:#e6f5f0;color:#087763;font-size:13px}.tag.off{background:#edf1f3;color:#536977}
-    .muted{color:#577080;font-size:14px}
-    .error{color:#b13232}
-    .scan-button{width:100%;padding:15px;border:0;border-radius:12px;background:#168b77;color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer}
-    .scan-button:disabled{background:#a8bdbc;cursor:not-allowed}
-    #scan-status{min-height:1.4em;margin-bottom:0}
-    .refresh-button{width:100%;padding:12px;border:1px solid #168b77;border-radius:12px;background:#fff;color:#087763;font:inherit;font-weight:700;cursor:pointer}
-    .refresh-button:disabled{opacity:.55;cursor:not-allowed}
-    #refresh-status{min-height:1.4em;margin:8px 0 0}
-    .monthly-item{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid #e5eeee}
-
-    *{box-sizing:border-box}
-    :root{color:#123d45;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
-    body{background:radial-gradient(circle at 12% 1%,#e5f5f0 0,#f5fbf9 42%,#eef7f5 100%)}
-    .header{background:transparent;color:#07585a;padding:23px 16px 6px}
-    .header h1{font-size:clamp(22px,5vw,30px);margin:0;font-weight:800;letter-spacing:.02em}
-    main{margin:14px auto;padding:0 14px 24px}
-    .card{border-radius:25px;box-shadow:0 12px 32px #055e5411;padding:24px;margin-bottom:18px}
-    .shop{min-height:294px;padding:28px 26px;background:radial-gradient(circle at 88% 19%,#19a08d66,transparent 45%),linear-gradient(135deg,#06555b,#087e71 63%,#006b66);border-radius:27px}
-    .shop::before{content:"";position:absolute;right:-50px;top:30px;width:260px;height:260px;border:1px solid #ffffff30;border-radius:50%;transform:rotate(-20deg)}
-    .shop::after{width:330px;height:330px;top:auto;bottom:-220px;right:auto;left:-120px;background:#26a49a25;border:1px solid #ffffff20}
-    .shop h2{font-size:18px;letter-spacing:.13em;margin:0 0 22px;color:#eafff7}
-    .shop .balance{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
-    .shop .count-label{display:block;font-size:16px;font-weight:700}
-    .shop .big{font-size:clamp(52px,14vw,82px);line-height:1.07;letter-spacing:-.04em}
-    .shop .big small{font-size:22px;letter-spacing:0}
-    .shop .bonus{border-radius:999px;background:linear-gradient(95deg,#fff4be,#ffda76);color:#3c3216;box-shadow:0 5px 18px #033d3d44;font-size:14px}
-    .shop .stamps{justify-content:space-between;flex-wrap:nowrap;margin:26px 0 18px;gap:7px}
-    .shop .stamp{width:clamp(36px,13vw,66px);height:clamp(36px,13vw,66px);flex:0 1 66px;border:2px dashed #cefff2aa;font-size:clamp(19px,6vw,29px);color:#fff}
-    .shop .stamp.on{border:2px solid #fff;background:#fff;box-shadow:0 5px 10px #003f3e77;color:#087b70}
-    .shop .progress{margin:0;text-align:center;font-size:17px}
-    .shop .totals{text-align:center;margin-bottom:0;font-size:12px}
-    .tools{justify-content:flex-end;flex-wrap:wrap;margin:0 0 10px}
-    .refresh-button{border-radius:999px!important}
-    #refresh-status{margin:0;min-height:0;font-size:12px;flex-basis:100%;text-align:right}
-    .card h2{color:#07585a;margin:0 0 18px;font-size:21px}
-    .shop h2{color:#eafff7}
-    .upcoming .item{background:#f1f8f7;border:0;border-radius:17px;padding:16px;margin-bottom:12px}
-    .upcoming .item strong{font-size:17px}
-    .upcoming .pill{float:right;background:#e2f5e6;color:#137748;font-weight:700}
-    .upcoming .pill.done{background:#e8edef;color:#526c72}
-    .upcoming .notice{clear:both;padding-top:8px}
-    .scan-button{background:linear-gradient(100deg,#087f76,#078d83);box-shadow:0 6px 16px #087f7644}
-    .record{line-height:1.5}
-    @media(max-width:390px){.shop{padding:22px 18px}.shop .bonus{font-size:12px}.upcoming .pill{float:none;display:inline-block;margin-left:4px}}
-  </style>
+:root{font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;color:#093e39;font-synthesis:none}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:radial-gradient(ellipse at top,#e7f3ed,#f6faf7 50%,#edf6f1);line-height:1.6}main,.header{width:100%;max-width:680px;margin:auto;padding:0 18px}main{padding-bottom:36px}.header{padding-top:26px;padding-bottom:22px;display:flex;align-items:center;gap:12px}.header h1{font-size:clamp(24px,6.7vw,35px);font-weight:750;letter-spacing:-.035em;margin:0;line-height:1.1}.header h1 span{display:block;font-size:12px;letter-spacing:.12em;font-weight:600;margin-top:9px;color:#56766b}.member-mark{margin-left:auto;flex:none;border:1.5px solid #075d56;border-radius:50%;width:40px;height:40px;display:grid;place-items:center}.member-mark svg{width:24px;height:24px}.card{background:#ffffffeb;border:1px solid #e4eee8;border-radius:22px;padding:22px;margin-bottom:18px;box-shadow:0 8px 25px #064b3810}h2{font-size:19px;margin:0 0 15px;font-weight:750}.muted{font-size:13px;color:#688079}.shop{position:relative;overflow:hidden;border:2px solid #d9bb64;background:radial-gradient(ellipse at 85% 10%,#168a7060,transparent 65%),linear-gradient(130deg,#00453e,#086452 65%,#00443a);color:#fff;padding:24px 22px;box-shadow:0 10px 28px #064c3525}.shop:before{content:"";position:absolute;left:-15%;top:3%;width:125%;height:110px;border-bottom:1px solid #dfc87b;border-radius:50%;transform:rotate(-11deg);opacity:.65;pointer-events:none}.shop:after{content:"";position:absolute;left:-35%;bottom:-160px;width:450px;height:220px;border:1px solid #dfc87b;border-radius:50%;transform:rotate(15deg);opacity:.35;pointer-events:none}.shop>*{position:relative;z-index:1}.shop-brand{font-family:Georgia,serif;font-size:30px;letter-spacing:.025em;line-height:1.1;margin:0 0 8px}.shop h2{color:#fff;font-size:16px;margin:0}.member-caption{position:absolute;right:0;top:6px;font-size:9px;letter-spacing:.2em;color:#e1c979}.stamps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:28px 0 20px}.stamp{aspect-ratio:1;border-radius:50%;border:2px dashed #d8e8d066;color:#91bbaa55;display:grid;place-items:center}.stamp svg{width:55%;height:55%;fill:currentColor}.stamp.on{background:linear-gradient(130deg,#fffce5,#e5cf8b);border:2px solid #e8d494;box-shadow:0 4px 10px #001f3540;color:#065849;outline:1px solid #f9e5a3;outline-offset:3px}.progress{display:flex;align-items:center;justify-content:center;gap:15px;margin:8px 0;font-size:14px}.big{font-family:Georgia,serif;color:#e8d17f;font-size:49px;line-height:1.1;white-space:nowrap}.big small{font-size:26px}.progress-text{border-left:1px solid #d9e7d560;padding-left:15px}.bonus-row{margin:15px 0 6px;text-align:center}.bonus{display:inline-block;border:1px solid #d1bd76;color:#f5e6a5;border-radius:30px;padding:5px 12px;font-size:12px}.totals{color:#d2e7dd;font-size:11px;text-align:center;margin:7px 0 15px}.shop .muted{color:#d2e7dd}.bonus-help{font-size:12px;text-align:center;margin:8px 0}.shop-actions{display:flex;gap:10px;align-items:center;border-top:1px solid #d1e6dc40;padding-top:18px}.scan-button,.refresh-button{font:inherit;cursor:pointer;min-height:44px;border-radius:99px;font-weight:700}.scan-button{flex:1;min-width:0;border:0;background:#fafcf5;color:#07564a;padding:12px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}.scan-button svg{width:22px;height:22px;flex:none}.refresh-button{flex:none;border:1px solid #a9ccba70;background:transparent;color:#fff;padding:8px 11px;font-size:11px}.scan-button:disabled,.refresh-button:disabled{opacity:.5;cursor:not-allowed}.shop-status{font-size:11px;margin:8px 0 0;line-height:1.5;overflow-wrap:anywhere}.shop-status:empty{display:none}.error{color:#a62d3f}.shop .error{color:#ffcfca}.section-heading{display:flex;align-items:center;gap:10px}.section-heading svg{width:23px;height:23px;flex:none}.upcoming .item{padding:14px 0;border-top:1px solid #e1ece5}.upcoming .item:first-child{border:0;padding-top:0}.upcoming .item:last-child{padding-bottom:0}.item strong{font-size:17px;overflow-wrap:anywhere}.pill,.tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:20px;background:#e6f2e9;color:#176c52}.pill{float:right;margin-left:8px}.pill.done,.tag.off{color:#687970;background:#edf1ee}.notice{clear:both;font-size:13px;line-height:1.7;padding-top:6px;overflow-wrap:anywhere}.history-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}.history-menu a{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e5eee7;border-radius:18px;padding:18px 13px;color:#114b40;text-decoration:none;box-shadow:0 5px 20px #064b3809;font-weight:700;font-size:14px}.history-menu svg{width:30px;height:30px;flex:none}.history-menu span{margin-left:auto;font-size:20px}.record{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-top:1px solid #e5eee7;padding:13px 0;font-size:14px}.record strong{overflow-wrap:anywhere}.tag{flex:none;white-space:nowrap}.month{font-size:14px;color:#26785d;margin:18px 0 8px}.monthly-item{display:flex;justify-content:space-between;border-top:1px solid #e5eee7;padding:10px 0;font-size:14px}.card[id]{scroll-margin-top:18px}button:focus-visible,a:focus-visible{outline:3px solid #c59f44;outline-offset:3px}@media(max-width:390px){main,.header{padding-left:14px;padding-right:14px}.shop{padding:22px 17px}.stamps{gap:10px}.shop-brand{font-size:27px}.member-caption{font-size:8px}.shop-actions{gap:7px}.scan-button{font-size:12px;padding:12px 9px}.refresh-button{font-size:10px;padding:8px}.progress{gap:10px}.big{font-size:43px}.card{padding:18px}.history-menu a{padding:16px 11px;font-size:12px}}
+</style>
 </head>
 <body>
-<header class="header"><h1>MatchPoint スタンプカード</h1></header>
+<header class="header"><h1>MatchPoint<span>マイページ</span></h1><span class="member-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3z"/></svg></span></header>
 <main>
-  <section class="card shop" id="summary" aria-label="ショップカード">読み込み中...</section>
-  <section class="card upcoming"><div class="tools"><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button><span id="refresh-status" class="muted" role="status">読み込み中...</span></div><h2>▦ 参加予定イベント</h2><div id="upcoming">読み込み中...</div>
-    <button type="button" id="scan-button" class="scan-button" disabled>▣ QRコードを読み取る</button>
-    <p id="scan-status" class="muted" role="status">読み取り機能を確認中...</p>
-  </section>
-  <section class="card"><h2>◷ スタンプ・参加履歴</h2><div id="records"></div></section>
-  <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
-  <section class="card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
+<section class="card shop" aria-label="ショップカード"><div id="summary" aria-live="polite">読み込み中...</div><div class="shop-actions"><button type="button" id="scan-button" class="scan-button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM21 15v6h-6M12 3v3M12 12h3M3 12h3M12 18v3"/></svg>QRコードを読み取る</button><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button></div><p id="refresh-status" class="shop-status muted" role="status">読み込み中...</p><p id="scan-status" class="shop-status muted" role="status">読み取り機能を確認中...</p></section>
+<section class="card upcoming"><h2 class="section-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v5M17 3v5M3 11h18M7 15h3M14 15h3"/></svg>参加予定・お知らせ</h2><div id="upcoming">読み込み中...</div></section>
+<nav class="history-menu" aria-label="履歴"><a href="#history-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg>参加履歴<span aria-hidden="true">›</span></a><a href="#bonus-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12v9h16v-9M12 7v14"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 7C3 8 5-2 12 7c7-9 9 1 0 0"/></svg>特典履歴<span aria-hidden="true">›</span></a></nav>
+<section class="card" id="history-card"><h2>スタンプ・参加履歴</h2><div id="records"></div></section>
+<section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
+<section class="card" id="bonus-card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
 </main>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
@@ -88,7 +32,7 @@ const formatMonth=v=>new Date(v).toLocaleDateString('ja-JP',{timeZone:'Asia/Toky
 
 scanButton.addEventListener('click',async()=>{
   scanButton.disabled=true;
-  scanStatus.className='muted';
+  scanStatus.className='shop-status muted';
   scanStatus.textContent='カメラを起動しています...';
   try{
     const result=await liff.scanCodeV2();
@@ -105,7 +49,7 @@ scanButton.addEventListener('click',async()=>{
     // 既存の取得画面が、QRの期限・イベント・重複取得をサーバーへ照会する。
     location.assign(scanned.href);
   }catch(error){
-    scanStatus.className='error';
+    scanStatus.className='shop-status error';
     scanStatus.textContent=error instanceof TypeError
       ? 'QRコードの内容を読み取れませんでした。'
       : (error.message||'カメラを起動できませんでした。権限設定をご確認ください。');
@@ -126,7 +70,7 @@ function renderMyPage(data){
     const count=data.stampCount;
     const rem=count%5;
     const toNext=5-rem;
-    summary.innerHTML=`<h2>◈ MatchPoint <span aria-label="ショップカード">SHOP CARD</span></h2><div class="balance"><div><span class="count-label">スタンプ</span><div class="big">${count}<small> 個</small></div></div><span class="bonus">🎁 利用できる特典 ${data.availableBonus}個</span></div><div class="stamps" role="img" aria-label="5個ごとに特典。今回のカードは${rem}個獲得済み">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-hidden="true">${i<rem?'🏸':''}</span>`).join('')}</div><p class="progress">次の特典まであと <strong>${toNext}個</strong></p><p class="muted totals">獲得 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p class="progress">特典を受け取る際はスタッフにお声がけください。</p>':''}`;
+    summary.innerHTML=`<div class="shop-brand">MatchPoint</div><span class="member-caption">CLUB MEMBER</span><h2>ショップ スタンプカード</h2><div class="stamps" role="img" aria-label="5個ごとに特典。今回のカードは${rem}個獲得済み">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 33 20 9c1-3 5-2 5 1L15 35zm8 3L28 9c2-3 6-1 4 2L23 39zm9 4 10-24c2-3 6-1 4 2L32 43zM8 35c-4 4-2 9 2 11 4 1 7-1 8-4z"/></svg></span>`).join('')}</div><div class="progress"><span class="big">${rem}<small> / 5</small></span><span class="progress-text">あと <strong>${toNext}回</strong>で特典</span></div><div class="bonus-row"><span class="bonus">利用できる特典 ${data.availableBonus}個</span></div><p class="totals">累計 ${count}スタンプ ／ 獲得特典 ${data.earnedBonus}個 ／ 使用済み ${data.redeemedBonus}個</p>${data.availableBonus>0?'<p class="bonus-help">特典を受け取る際はスタッフにお声がけください。</p>':''}`;
     const upcoming=data.upcoming||[];
     document.getElementById('upcoming').innerHTML=upcoming.length?upcoming.map(e=>{
       const details=[e.startsAt?`日時：${escapeHtml(formatDate(e.startsAt))}`:'',e.location?`場所：${escapeHtml(e.location)}`:'',e.belongings?`持ち物：${escapeHtml(e.belongings)}`:''].filter(Boolean).join('<br>');
@@ -151,7 +95,7 @@ let loadedOnce=false;
 async function loadMyPage(){
   if(refreshButton.disabled&&loadedOnce)return;
   refreshButton.disabled=true;
-  refreshStatus.className='muted';
+  refreshStatus.className='shop-status muted';
   refreshStatus.textContent='最新の記録を確認しています...';
   try{
     const accessToken=liff.getAccessToken();
@@ -164,7 +108,7 @@ async function loadMyPage(){
     loadedOnce=true;
     refreshStatus.textContent='最新の記録に更新しました。';
   }catch(error){
-    refreshStatus.className='error';
+    refreshStatus.className='shop-status error';
     refreshStatus.textContent=error.message||'通信エラーが発生しました。';
     if(!loadedOnce){const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent}
   }finally{
@@ -184,7 +128,7 @@ refreshButton.addEventListener('click',loadMyPage);
     }
     await loadMyPage();
   }catch(error){
-    refreshStatus.className='error';
+    refreshStatus.className='shop-status error';
     refreshStatus.textContent=error.message||'LINEの初期化に失敗しました。';
     const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent;
   }
