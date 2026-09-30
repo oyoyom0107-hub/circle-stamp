@@ -544,15 +544,19 @@ function showScreen(id,scroll=true){
  featureScreens.forEach(name=>el(name).hidden=name!==id);
  if(scroll)window.scrollTo({top:0,behavior:'smooth'});
 }
+function returnHomeMenu(){
+ showScreen('home',false);
+ el('homeMenu').previousElementSibling.scrollIntoView({behavior:'smooth',block:'start'});
+}
 featureScreens.forEach(id=>{
  const section=el(id),back=document.createElement('button');
  back.type='button';back.className='back-home';back.textContent='← ホームに戻る';
- back.onclick=()=>showScreen(['events','roster','live'].includes(id)?'eventHub':'home');section.prepend(back);
+ back.onclick=()=>{if(['events','roster','live'].includes(id))showScreen('eventHub');else returnHomeMenu()};section.prepend(back);
 });
 for(const menuId of ['homePrimary','homeMenu','eventHubMenu'])el(menuId).onclick=ev=>{const id=ev.target.closest('[data-screen]')?.dataset.screen;if(id)showScreen(id)};
 el('openHistory').onclick=()=>showScreen('history');el('closeHistory').onclick=()=>showScreen('historyHub');
 el('openOperations').onclick=()=>showScreen('operations');el('closeOperations').onclick=()=>showScreen('historyHub');
-el('openAdmins').onclick=()=>{if(state.canManageAdmins)showScreen('admins')};el('closeAdmins').onclick=()=>showScreen('home');
+el('openAdmins').onclick=()=>{if(state.canManageAdmins)showScreen('admins')};el('closeAdmins').onclick=returnHomeMenu;
 el('openActivities').onclick=()=>{el('panel').hidden=true;el('activityScreen').hidden=false;scrollTo(0,0)};
 el('closeActivities').onclick=()=>{el('activityScreen').hidden=true;el('panel').hidden=false;el('openActivities').scrollIntoView()};
 el('activityName').oninput=()=>{const name=el('activityName').value.trim();el('activityCode').value=romanize(name)};
