@@ -25,20 +25,28 @@
 .notice-open{display:block;margin-top:10px;padding:8px 12px;border:1px solid #c7e3d6;border-radius:10px;color:#075b4e;background:#eef8f2;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .collection-item{padding:15px 0;border-top:1px solid #e1ece5}.collection-item:first-child{border:0;padding-top:0}.collection-item:last-child{padding-bottom:0}.collection-item strong{display:block;font-size:15px;overflow-wrap:anywhere}.collection-status{display:inline-block;margin-bottom:6px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:#fff0cf;color:#775515}.collection-status.paid{background:#e1f3e9;color:#176c52}.collection-amount{font-size:21px;font-weight:750;margin:5px 0;color:#0a594b}.collection-item .muted{font-size:12px}
 .member-dialog{width:calc(100% - 36px);max-width:410px;max-height:85dvh;overflow:auto;border:1px solid #dbeae1;border-radius:24px;padding:26px 22px;background:#fff;color:#093e39;box-shadow:0 20px 60px #003b3533}.member-dialog::backdrop{background:#002e2866}.member-dialog h2{font-size:22px;line-height:1.4;margin:14px 0 10px;overflow-wrap:anywhere}.member-dialog p{overflow-wrap:anywhere}.member-dialog button{font:inherit;border:0;border-radius:12px;background:#076a59;color:white;padding:11px 16px;cursor:pointer;width:100%;margin-top:14px}.result-icon{width:64px;height:64px;border-radius:50%;background:#e1f3e9;color:#08705a;margin:auto;display:grid;place-items:center;font-size:34px;font-weight:750}.result-icon.info{background:#e9f2f8;color:#347286}.result-icon.warning{background:#fff1d6;color:#9e741d}.result-icon.error{background:#fce8ec;color:#a62d3f}#qr-result-dialog{text-align:center}#qr-result-event{font-weight:700}#qr-result-detail{color:#688079;font-size:14px}#notice-dialog-details{font-size:14px;line-height:1.8;white-space:pre-line}#notice-dialog-state{font-size:12px}
+
+.member-mark{background:#f8fcf9;color:#075d56;cursor:pointer;padding:0;min-width:44px;min-height:44px}.page-toolbar{display:flex;justify-content:flex-end;margin:-6px 0 12px}.page-toolbar .refresh-button{color:#075d56;background:#e0f0e9;border:0;padding:6px 10px;font-size:11px;min-height:32px}.profile-back{font:inherit;font-size:13px;font-weight:700;color:#075d56;background:#e0f0e9;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;margin-bottom:18px}.profile-card{text-align:center}.profile-avatar{display:grid;place-items:center;margin:0 auto 14px;width:55px;height:55px;border-radius:50%;color:#08705a;background:#e1f3e9;font-size:26px}.profile-name{font-size:24px;font-weight:750;overflow-wrap:anywhere;margin:8px 0}.reward-compact{font-size:20px;font-weight:750;margin:0 0 12px}.card details summary{cursor:pointer;font-size:13px;color:#176c52;padding:8px 0}.card details[open]>summary{margin-bottom:10px}#profile-screen{scroll-margin-top:16px}.collection-paid{margin-top:14px}.notice-count{font-size:12px;color:#926c18;margin:0 0 10px}
 </style>
 </head>
 <body>
-<header class="header"><h1>MatchPoint<span>マイページ</span></h1><span class="member-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3z"/></svg></span></header>
+<header class="header"><h1>MatchPoint<span>マイページ</span></h1><button type="button" id="profile-button" class="member-mark" aria-label="プロフィールと履歴を開く" aria-controls="profile-screen" aria-expanded="false"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3z"/></svg></button></header>
 <main>
+<div id="mypage-screen"><div class="page-toolbar"><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button></div>
 <section class="card shop" aria-label="ショップカード"><div id="summary" aria-live="polite">読み込み中...</div></section>
-<div class="outside-actions"><div class="shop-actions"><button type="button" id="scan-button" class="scan-button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM21 15v6h-6M12 3v3M12 12h3M3 12h3M12 18v3"/></svg>QRコードを読み取る</button><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button></div><p id="refresh-status" class="shop-status muted" role="status">読み込み中...</p><p id="scan-status" class="shop-status muted" role="status">読み取り機能を確認中...</p></div>
-<section class="card rewards" aria-labelledby="reward-heading"><h2 id="reward-heading" class="section-heading"><span aria-hidden="true">🎁</span>特典</h2><div id="reward-summary" aria-live="polite">読み込み中...</div></section>
+<div class="outside-actions"><div class="shop-actions"><button type="button" id="scan-button" class="scan-button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM21 15v6h-6M12 3v3M12 12h3M3 12h3M12 18v3"/></svg>QRコードを読み取る</button></div><p id="refresh-status" class="shop-status muted" role="status">読み込み中...</p><p id="scan-status" class="shop-status muted" role="status">読み取り機能を確認中...</p></div>
+<section class="card rewards" aria-labelledby="reward-heading"><h2 id="reward-heading" class="section-heading"><span aria-hidden="true">🎁</span>特典</h2><p id="reward-compact" class="reward-compact" aria-live="polite">読み込み中...</p><details><summary>特典の詳細を見る</summary><div id="reward-summary" aria-live="polite">読み込み中...</div></details></section>
 <section class="card" aria-labelledby="collection-heading"><h2 id="collection-heading" class="section-heading"><span aria-hidden="true">▤</span>自分の集金状況</h2><div id="member-collections" aria-live="polite">読み込み中...</div></section>
 <section class="card upcoming"><h2 class="section-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v5M17 3v5M3 11h18M7 15h3M14 15h3"/></svg>参加予定・お知らせ</h2><div id="upcoming">読み込み中...</div></section>
+</div>
+<section id="profile-screen" hidden aria-labelledby="profile-heading">
+<button type="button" id="profile-back" class="profile-back">← マイページに戻る</button>
+<section class="card profile-card"><span class="profile-avatar" aria-hidden="true">●</span><h2 id="profile-heading">プロフィール</h2><p id="profile-name" class="profile-name" aria-live="polite">LINE名を確認中...</p><p class="muted">あなたの参加・特典の記録</p></section>
 <nav class="history-menu" aria-label="履歴"><a href="#history-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg>参加履歴<span aria-hidden="true">›</span></a><a href="#bonus-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12v9h16v-9M12 7v14"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 7C3 8 5-2 12 7c7-9 9 1 0 0"/></svg>特典履歴<span aria-hidden="true">›</span></a></nav>
 <section class="card" id="history-card"><h2>スタンプ・参加履歴</h2><div id="records"></div></section>
 <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
 <section class="card" id="bonus-card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
+</section>
 </main>
 <dialog id="qr-result-dialog" class="member-dialog" aria-labelledby="qr-result-title"><div id="qr-result-icon" class="result-icon" aria-hidden="true"></div><h2 id="qr-result-title"></h2><p id="qr-result-event"></p><p id="qr-result-detail"></p><button id="qr-result-close" type="button">マイページに戻る</button></dialog>
 <dialog id="notice-dialog" class="member-dialog" aria-labelledby="notice-dialog-title"><h2 id="notice-dialog-title"></h2><div id="notice-dialog-details"></div><p id="notice-dialog-state" role="status"></p><button id="notice-dialog-close" type="button">閉じる</button></dialog>
@@ -53,6 +61,21 @@ const refreshButton=document.getElementById('refresh-button');
 const refreshStatus=document.getElementById('refresh-status');
 const formatDate=v=>new Date(v).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
 const formatMonth=v=>new Date(v).toLocaleDateString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'long'});
+
+
+let profileReturnScroll=0;
+function showProfile(open){
+ if(open)profileReturnScroll=window.scrollY;
+ document.getElementById('mypage-screen').hidden=open;
+ document.getElementById('profile-screen').hidden=!open;
+ document.getElementById('profile-button').setAttribute('aria-expanded',String(open));
+ window.scrollTo({top:open?0:profileReturnScroll,behavior:'instant'});
+ if(open)document.getElementById('profile-back').focus({preventScroll:true});
+ else document.getElementById('profile-button').focus({preventScroll:true});
+}
+document.getElementById('profile-button').addEventListener('click',()=>showProfile(document.getElementById('profile-screen').hidden));
+document.getElementById('profile-back').addEventListener('click',()=>showProfile(false));
+async function loadProfileName(){try{const profile=await liff.getProfile();document.getElementById('profile-name').textContent=profile.displayName||'名前未登録'}catch(error){document.getElementById('profile-name').textContent='LINE名を取得できませんでした'}}
 
 let dashboardData=null;
 async function memberRequest(type,fields={}){
@@ -88,11 +111,14 @@ scanButton.addEventListener('click',async()=>{
 });
 function renderMemberCollections(data){
  const collections=data.collections||[],today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
- document.getElementById('member-collections').innerHTML=collections.length?collections.map(c=>{const paid=c.status==='集金済み',period=c.startDate&&c.endDate?`${escapeHtml(c.startDate.replaceAll('-','/'))} 〜 ${escapeHtml(c.endDate.replaceAll('-','/'))}`:'期間未設定';return `<div class="collection-item"><span class="collection-status ${paid?'paid':''}">${paid?'集金済み':'未集金'}</span><strong>${escapeHtml(c.eventName)}</strong><div class="collection-amount">${c.amount==null?'料金未設定':Number(c.amount).toLocaleString('ja-JP')+'円'}</div><div class="muted">集金期間：${period}${paid&&c.paidAt?'<br>受付日時：'+escapeHtml(formatDate(c.paidAt)):!paid&&c.startDate&&today<c.startDate?'<br>集金開始前です。':!paid&&c.endDate&&today>c.endDate?'<br>集金期間は終了しています。スタッフにご確認ください。':''}</div></div>`}).join(''):'現在、対象になっている集金はありません。';
+ const item=c=>{const paid=c.status==='集金済み',period=c.startDate&&c.endDate?`${escapeHtml(c.startDate.replaceAll('-','/'))} 〜 ${escapeHtml(c.endDate.replaceAll('-','/'))}`:'期間未設定';return `<div class="collection-item"><span class="collection-status ${paid?'paid':''}">${paid?'集金済み':'未集金'}</span><strong>${escapeHtml(c.eventName)}</strong><div class="collection-amount">${c.amount==null?'料金未設定':Number(c.amount).toLocaleString('ja-JP')+'円'}</div><div class="muted">集金期間：${period}${paid&&c.paidAt?'<br>受付日時：'+escapeHtml(formatDate(c.paidAt)):!paid&&c.startDate&&today<c.startDate?'<br>集金開始前です。':!paid&&c.endDate&&today>c.endDate?'<br>集金期間は終了しています。スタッフにご確認ください。':''}</div></div>`};
+ const pending=collections.filter(c=>c.status!=='集金済み'),paid=collections.filter(c=>c.status==='集金済み');
+ document.getElementById('member-collections').innerHTML=(pending.length?pending.map(item).join(''):'<p class="muted">未集金の項目はありません。</p>')+(paid.length?'<details class="collection-paid"><summary>集金済み '+paid.length+'件を確認</summary>'+paid.map(item).join('')+'</details>':'');
 }
 function renderMemberNotices(data){
  const upcoming=data.upcoming||[];
- document.getElementById('upcoming').innerHTML=upcoming.length?upcoming.map(e=>`<div class="item"><strong>${escapeHtml(e.eventName)}</strong>${e.noticeUnread?'<span class="new-badge">NEW</span>':''}<span class="pill ${['受付済み','集金済み','期限切れ'].includes(e.status)?'done':''}">${escapeHtml(e.status)}</span>${e.noticeVersion?`<button class="notice-open" type="button" data-open-notice="${escapeHtml(e.eventId)}">${e.noticeUnread?'新しいお知らせを開く':'お知らせを確認'}</button>`:''}</div>`).join(''):'参加予定のイベントはありません。';
+ const items=upcoming.map(e=>`<div class="item"><strong>${escapeHtml(e.eventName)}</strong>${e.noticeUnread?'<span class="new-badge">NEW</span>':''}<span class="pill ${['受付済み','集金済み','期限切れ'].includes(e.status)?'done':''}">${escapeHtml(e.status)}</span>${e.noticeVersion?`<button class="notice-open" type="button" data-open-notice="${escapeHtml(e.eventId)}">${e.noticeUnread?'新しいお知らせを開く':'お知らせを確認'}</button>`:''}</div>`);
+ const unread=upcoming.filter(e=>e.noticeUnread).length;document.getElementById('upcoming').innerHTML=(unread?'<p class="notice-count">未読のお知らせ '+unread+'件</p>':'')+(items.length?items.slice(0,3).join(''):'参加予定のイベントはありません。')+(items.length>3?'<details><summary>ほかの予定・お知らせ '+(items.length-3)+'件</summary>'+items.slice(3).join('')+'</details>':'');
 }
 let noticeOpenId='';
 document.getElementById('upcoming').addEventListener('click',async ev=>{
@@ -103,7 +129,7 @@ document.getElementById('upcoming').addEventListener('click',async ev=>{
 document.getElementById('notice-dialog-close').addEventListener('click',()=>{noticeOpenId='';document.getElementById('notice-dialog').close()});
 
 function renderMyPage(data){
-    dashboardData=data;renderMemberCollections(data);renderMemberNotices(data);
+    dashboardData=data;renderMemberCollections(data);renderMemberNotices(data);document.getElementById('reward-compact').textContent='利用できる特典 '+data.availableBonus+'個';
     const summary=document.getElementById('summary');
     summary.classList.remove('error');
     const history=[...(data.records||[])].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
@@ -161,6 +187,7 @@ refreshButton.addEventListener('click',loadMyPage);
   try{
     await liff.init({liffId:LIFF_ID});
     if(!liff.isLoggedIn()){liff.login({redirectUri:new URL('mypage.html',location.href).href});return}
+    void loadProfileName();
     if(liff.isApiAvailable('scanCodeV2')){
       scanButton.disabled=false;
       scanStatus.textContent='活動会場のQRコードにカメラを向けてください。';
