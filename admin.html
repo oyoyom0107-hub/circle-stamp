@@ -516,16 +516,19 @@ el('addPlan').onclick=()=>{if(!state.canEditCalendar)return;clearPlan();el('cale
 el('calendarList').onclick=async ev=>{const b=ev.target.closest('button');if(!b||!state.canEditCalendar)return;const id=b.dataset.planEdit??b.dataset.planCopy??b.dataset.planDelete,p=(state.calendarPlans||[]).find(x=>String(x.planId)===id);if(!p)return;el('calendarActions').close();if(b.dataset.planDelete!==undefined){const yes=await confirmAction('予定を削除',`${p.title} ／ ${planPeriod(p)} を削除します。`);if(yes)await run('calendarDelete',{planId:id},'予定を削除しました。');return}editPlan(p,b.dataset.planCopy!==undefined)};
 async function saveCalendarPlan(payload){
  const latest=await api('adminData');
- const others=(latest.calendarPlans||[]).filter(p=>String(p.planId)!==String(payload.planId)&&String(p.title).trim()===payload.title);
+ const dateKey=value=>{const text=String(value||'');if(!text)return '';if(/^\d{4}-\d{2}-\d{2}$/.test(text))return 'day:'+text;const n=Date.parse(text);return Number.isFinite(n)?'time:'+n:'invalid:'+text};
+ const location=String(payload.location||'').trim();
+ const matchesPlaceTime=p=>!!location&&String(p.location||'').trim()===location&&dateKey(p.startsAt)===dateKey(payload.startsAt)&&dateKey(p.endsAt||(/^\d{4}-\d{2}-\d{2}$/.test(String(p.startsAt))?p.startsAt:''))===dateKey(payload.endsAt||(/^\d{4}-\d{2}-\d{2}$/.test(String(payload.startsAt))?payload.startsAt:''));
+ const others=(latest.calendarPlans||[]).filter(p=>String(p.planId)!==String(payload.planId)&&(String(p.title).trim()===payload.title||matchesPlaceTime(p)));
  if(others.length){
-  const yes=await confirmAction('上書きしますか？',`「${payload.title}」は登録済みです。同名の古い予定${others.length}件を置き換えて、新しい内容を保存します。`,{confirmLabel:'はい',cancelLabel:'いいえ'});
+  const yes=await confirmAction('上書きしますか？',`同名、または同じ場所・開始日時・終了日時の予定が登録されています。次の${others.length}件を「${payload.title}」の新しい内容で置き換えます。\n${others.map(p=>"・"+p.title+" ／ "+planPeriod(p)).join("\n")}`,{confirmLabel:'はい',cancelLabel:'いいえ'});
   if(!yes)return false;
  }
  const target=payload.planId||others[0]?.planId||'';
  await api('calendarSave',{...payload,planId:target});
  let removed=0;
  try{for(const p of others){if(String(p.planId)===String(target))continue;await api('calendarDelete',{planId:p.planId});removed++}}
- catch(e){await refresh();throw Error('新しい予定は保存済みですが、古い同名予定の整理に失敗しました。もう一度保存して確認してください：'+e.message)}
+ catch(e){await refresh();throw Error('新しい予定は保存済みですが、古い重複予定の整理に失敗しました。もう一度保存して確認してください：'+e.message)}
  return true;
 }
 el('savePlan').onclick=async()=>{if(!state.canEditCalendar)return;const title=el('planTitle').value.trim(),start=el('planStartDate').value,end=el('planEndDate').value,timed=el('planUseTime').checked;if(!title||!start){status('予定名と開始日を入力してください。',true);return}const toISO=(d,t)=>new Date(`${d}T${t}:00+09:00`).toISOString().replace('.000Z','Z');el('savePlan').disabled=true;try{const startsAt=timed?toISO(start,el('planStartTime').value||'00:00'):start,endsAt=timed?(end||el('planEndTime').value?toISO(end||start,el('planEndTime').value||'23:59'):''):end;if(endsAt&&Date.parse(endsAt)<Date.parse(startsAt))throw Error('終了は開始以降にしてください。');const saved=await saveCalendarPlan({planId:el('planId').value,title,startsAt,endsAt,location:el('planLocation').value.trim(),memo:el('planMemo').value.trim()});if(!saved)return;clearPlan();el('calendarEditor').hidden=true;await refresh();status('予定を保存しました。')}catch(error){status(error.message,true)}finally{el('savePlan').disabled=false}};
