@@ -542,11 +542,11 @@ function showScreen(id,scroll=true){
  currentScreen=id;
  el('homeScreen').hidden=id!=='home';
  featureScreens.forEach(name=>el(name).hidden=name!==id);
- if(scroll)window.scrollTo({top:0,behavior:'smooth'});
+ if(scroll)window.scrollTo({top:0,behavior:'instant'});
 }
 function returnHomeMenu(){
  showScreen('home',false);
- el('homeMenu').previousElementSibling.scrollIntoView({behavior:'smooth',block:'start'});
+ el('homeMenu').previousElementSibling.scrollIntoView({behavior:'instant',block:'start'});
 }
 featureScreens.forEach(id=>{
  const section=el(id),back=document.createElement('button');
