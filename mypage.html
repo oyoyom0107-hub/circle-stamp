@@ -20,6 +20,11 @@
 .reward-label{text-align:center;font-size:14px;color:#698077;margin:0}.reward-count{text-align:center;font-size:50px;font-weight:750;line-height:1.2;margin:4px 0 16px}.reward-count small{font-size:20px;margin-left:5px}
 .reward-totals{background:#f0f6f3;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;font-size:13px;color:#61766d;padding:13px 10px}.reward-totals strong{color:#124c41}.reward-help{text-align:center;margin:14px 0 0;font-size:12px}
 @media(max-width:360px){.outside-actions .shop-actions{gap:7px}.outside-actions .refresh-button{font-size:10px;padding:8px}.shop .progress-text{font-size:12px}}
+
+.new-badge{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:99px;background:#f5d778;color:#594817;font-size:10px;font-weight:800;letter-spacing:.06em}
+.notice-open{display:block;margin-top:10px;padding:8px 12px;border:1px solid #c7e3d6;border-radius:10px;color:#075b4e;background:#eef8f2;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.collection-item{padding:15px 0;border-top:1px solid #e1ece5}.collection-item:first-child{border:0;padding-top:0}.collection-item:last-child{padding-bottom:0}.collection-item strong{display:block;font-size:15px;overflow-wrap:anywhere}.collection-status{display:inline-block;margin-bottom:6px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:#fff0cf;color:#775515}.collection-status.paid{background:#e1f3e9;color:#176c52}.collection-amount{font-size:21px;font-weight:750;margin:5px 0;color:#0a594b}.collection-item .muted{font-size:12px}
+.member-dialog{width:calc(100% - 36px);max-width:410px;max-height:85dvh;overflow:auto;border:1px solid #dbeae1;border-radius:24px;padding:26px 22px;background:#fff;color:#093e39;box-shadow:0 20px 60px #003b3533}.member-dialog::backdrop{background:#002e2866}.member-dialog h2{font-size:22px;line-height:1.4;margin:14px 0 10px;overflow-wrap:anywhere}.member-dialog p{overflow-wrap:anywhere}.member-dialog button{font:inherit;border:0;border-radius:12px;background:#076a59;color:white;padding:11px 16px;cursor:pointer;width:100%;margin-top:14px}.result-icon{width:64px;height:64px;border-radius:50%;background:#e1f3e9;color:#08705a;margin:auto;display:grid;place-items:center;font-size:34px;font-weight:750}.result-icon.info{background:#e9f2f8;color:#347286}.result-icon.warning{background:#fff1d6;color:#9e741d}.result-icon.error{background:#fce8ec;color:#a62d3f}#qr-result-dialog{text-align:center}#qr-result-event{font-weight:700}#qr-result-detail{color:#688079;font-size:14px}#notice-dialog-details{font-size:14px;line-height:1.8;white-space:pre-line}#notice-dialog-state{font-size:12px}
 </style>
 </head>
 <body>
@@ -28,12 +33,15 @@
 <section class="card shop" aria-label="ショップカード"><div id="summary" aria-live="polite">読み込み中...</div></section>
 <div class="outside-actions"><div class="shop-actions"><button type="button" id="scan-button" class="scan-button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM21 15v6h-6M12 3v3M12 12h3M3 12h3M12 18v3"/></svg>QRコードを読み取る</button><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button></div><p id="refresh-status" class="shop-status muted" role="status">読み込み中...</p><p id="scan-status" class="shop-status muted" role="status">読み取り機能を確認中...</p></div>
 <section class="card rewards" aria-labelledby="reward-heading"><h2 id="reward-heading" class="section-heading"><span aria-hidden="true">🎁</span>特典</h2><div id="reward-summary" aria-live="polite">読み込み中...</div></section>
+<section class="card" aria-labelledby="collection-heading"><h2 id="collection-heading" class="section-heading"><span aria-hidden="true">▤</span>自分の集金状況</h2><div id="member-collections" aria-live="polite">読み込み中...</div></section>
 <section class="card upcoming"><h2 class="section-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v5M17 3v5M3 11h18M7 15h3M14 15h3"/></svg>参加予定・お知らせ</h2><div id="upcoming">読み込み中...</div></section>
 <nav class="history-menu" aria-label="履歴"><a href="#history-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg>参加履歴<span aria-hidden="true">›</span></a><a href="#bonus-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12v9h16v-9M12 7v14"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 7C3 8 5-2 12 7c7-9 9 1 0 0"/></svg>特典履歴<span aria-hidden="true">›</span></a></nav>
 <section class="card" id="history-card"><h2>スタンプ・参加履歴</h2><div id="records"></div></section>
 <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
 <section class="card" id="bonus-card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
 </main>
+<dialog id="qr-result-dialog" class="member-dialog" aria-labelledby="qr-result-title"><div id="qr-result-icon" class="result-icon" aria-hidden="true"></div><h2 id="qr-result-title"></h2><p id="qr-result-event"></p><p id="qr-result-detail"></p><button id="qr-result-close" type="button">マイページに戻る</button></dialog>
+<dialog id="notice-dialog" class="member-dialog" aria-labelledby="notice-dialog-title"><h2 id="notice-dialog-title"></h2><div id="notice-dialog-details"></div><p id="notice-dialog-state" role="status"></p><button id="notice-dialog-close" type="button">閉じる</button></dialog>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 const API='https://script.google.com/macros/s/AKfycbxTYedx5VBpe5BPyIsQx0iNwS_3xZ3EaWfQDDyOGSQhP3TK6J0F-VWRfYvTjaOATawn/exec';
@@ -46,35 +54,56 @@ const refreshStatus=document.getElementById('refresh-status');
 const formatDate=v=>new Date(v).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
 const formatMonth=v=>new Date(v).toLocaleDateString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'long'});
 
+let dashboardData=null;
+async function memberRequest(type,fields={}){
+ const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINEから開き直してください。');
+ const response=await fetch(API,{method:'POST',body:JSON.stringify({type,accessToken,...fields})});
+ if(!response.ok)throw Error('通信エラーが発生しました。');return response.json();
+}
+function collectionQR(eventId){return String(eventId).startsWith('shuukin')||String(eventId).startsWith('saakurutiishatsushuukin')}
+function qrResultView(data,eventId){
+ const collection=collectionQR(eventId),name=data.eventName||dashboardData?.collections?.find(c=>String(c.eventId)===eventId)?.eventName||dashboardData?.upcoming?.find(e=>String(e.eventId)===eventId)?.eventName||'';
+ if(data.ok){if(collection)return {title:'集金受付が完了しました',event:name,detail:'集金済みとして記録しました。スタンプの付与はありません。',icon:'✓',kind:'success'};if(data.stampMode==='on')return {title:'スタンプを1個獲得しました！',event:name,detail:`累計 ${Number(data.stampCount)||0}スタンプ${data.availableBonus>0?' ／ 利用できる特典 '+data.availableBonus+'個':''}`,icon:'+1',kind:'success'};return {title:'参加を記録しました',event:name,detail:'今回は参加記録のみです。スタンプの付与はありません。',icon:'✓',kind:'success'}}
+ const views={ALREADY_RECORDED:{title:collection?'この集金は集金済みです':'このイベントは記録済みです',detail:collection?'追加の集金記録は作成していません。':'同じイベントのスタンプ・参加記録は1回だけ取得できます。',icon:'i',kind:'info'},EXPIRED:{title:'QRコードの期限が切れています',detail:'スタッフに新しいQRコードをご確認ください。',icon:'⌛',kind:'warning'},PAUSED:{title:'受付を停止しています',detail:'スタッフに受付状況をご確認ください。',icon:'Ⅱ',kind:'warning'},INVALID_QR:{title:'このQRコードは使用できません',detail:'スタッフが現在表示しているQRコードを読み取ってください。',icon:'!',kind:'warning'}};
+ return {...(views[data.code]||{title:'受付できませんでした',detail:data.message||'スタッフにご確認ください。',icon:'!',kind:'error'}),event:name};
+}
+function showQRResult(view){
+ document.getElementById('qr-result-title').textContent=view.title;document.getElementById('qr-result-event').textContent=view.event||'';document.getElementById('qr-result-detail').textContent=view.detail;
+ const icon=document.getElementById('qr-result-icon');icon.textContent=view.icon;icon.className='result-icon '+view.kind;
+ const dialog=document.getElementById('qr-result-dialog');if(!dialog.open)dialog.showModal();
+}
+document.getElementById('qr-result-close').addEventListener('click',()=>document.getElementById('qr-result-dialog').close());
 scanButton.addEventListener('click',async()=>{
-  scanButton.disabled=true;
-  scanStatus.className='shop-status muted';
-  scanStatus.textContent='カメラを起動しています...';
-  try{
-    const result=await liff.scanCodeV2();
-    if(!result || !result.value){
-      scanStatus.textContent='読み取りがキャンセルされました。';
-      return;
-    }
-    const scanned=new URL(result.value);
-    const expected=new URL('stamp/index.html',location.href);
-    if(scanned.origin!==expected.origin || scanned.pathname!==expected.pathname ||
-       !scanned.searchParams.get('event') || !scanned.searchParams.get('code')){
-      throw Error('このサークルの参加用QRコードを読み取ってください。');
-    }
-    // 既存の取得画面が、QRの期限・イベント・重複取得をサーバーへ照会する。
-    location.assign(scanned.href);
-  }catch(error){
-    scanStatus.className='shop-status error';
-    scanStatus.textContent=error instanceof TypeError
-      ? 'QRコードの内容を読み取れませんでした。'
-      : (error.message||'カメラを起動できませんでした。権限設定をご確認ください。');
-  }finally{
-    scanButton.disabled=false;
-  }
+ scanButton.disabled=true;scanStatus.className='shop-status muted';scanStatus.textContent='カメラを起動しています...';let submitted=false;
+ try{
+  const result=await liff.scanCodeV2();if(!result?.value){scanStatus.textContent='読み取りがキャンセルされました。';return}
+  let scanned;try{scanned=new URL(result.value)}catch(e){throw Error('このサークルの参加用QRコードを読み取ってください。')}
+  const expected=new URL('stamp/index.html',location.href);
+  if(scanned.origin!==expected.origin||scanned.pathname!==expected.pathname||!scanned.searchParams.get('event')||!scanned.searchParams.get('code'))throw Error('このサークルの参加用QRコードを読み取ってください。');
+  const eventId=scanned.searchParams.get('event');scanStatus.textContent='受付結果を確認しています...';submitted=true;
+  const data=await memberRequest('stamp',{eventId,code:scanned.searchParams.get('code')});showQRResult(qrResultView(data,eventId));scanStatus.textContent='';
+  if(data.ok||data.code==='ALREADY_RECORDED')await loadMyPage();
+ }catch(error){scanStatus.className='shop-status error';scanStatus.textContent=error.message||'読み取りに失敗しました。';showQRResult({title:submitted?'受付結果を確認できませんでした':'QRコードを読み取れませんでした',event:'',detail:submitted?'通信状況を確認し、「表示を更新」で記録をご確認ください。':scanStatus.textContent,icon:'!',kind:'error'})}
+ finally{scanButton.disabled=false}
 });
+function renderMemberCollections(data){
+ const collections=data.collections||[],today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+ document.getElementById('member-collections').innerHTML=collections.length?collections.map(c=>{const paid=c.status==='集金済み',period=c.startDate&&c.endDate?`${escapeHtml(c.startDate.replaceAll('-','/'))} 〜 ${escapeHtml(c.endDate.replaceAll('-','/'))}`:'期間未設定';return `<div class="collection-item"><span class="collection-status ${paid?'paid':''}">${paid?'集金済み':'未集金'}</span><strong>${escapeHtml(c.eventName)}</strong><div class="collection-amount">${c.amount==null?'料金未設定':Number(c.amount).toLocaleString('ja-JP')+'円'}</div><div class="muted">集金期間：${period}${paid&&c.paidAt?'<br>受付日時：'+escapeHtml(formatDate(c.paidAt)):!paid&&c.startDate&&today<c.startDate?'<br>集金開始前です。':!paid&&c.endDate&&today>c.endDate?'<br>集金期間は終了しています。スタッフにご確認ください。':''}</div></div>`}).join(''):'現在、対象になっている集金はありません。';
+}
+function renderMemberNotices(data){
+ const upcoming=data.upcoming||[];
+ document.getElementById('upcoming').innerHTML=upcoming.length?upcoming.map(e=>`<div class="item"><strong>${escapeHtml(e.eventName)}</strong>${e.noticeUnread?'<span class="new-badge">NEW</span>':''}<span class="pill ${['受付済み','集金済み','期限切れ'].includes(e.status)?'done':''}">${escapeHtml(e.status)}</span>${e.noticeVersion?`<button class="notice-open" type="button" data-open-notice="${escapeHtml(e.eventId)}">${e.noticeUnread?'新しいお知らせを開く':'お知らせを確認'}</button>`:''}</div>`).join(''):'参加予定のイベントはありません。';
+}
+let noticeOpenId='';
+document.getElementById('upcoming').addEventListener('click',async ev=>{
+ const button=ev.target.closest('[data-open-notice]');if(!button||button.disabled)return;const id=button.dataset.openNotice,e=dashboardData?.upcoming?.find(e=>String(e.eventId)===id);if(!e)return;
+ noticeOpenId=id;button.disabled=true;document.getElementById('notice-dialog-title').textContent=e.eventName;document.getElementById('notice-dialog-details').textContent=[e.startsAt?'日時：'+formatDate(e.startsAt):'',e.location?'場所：'+e.location:'',e.belongings?'持ち物：'+e.belongings:''].filter(Boolean).join('\n');const message=document.getElementById('notice-dialog-state');message.textContent=e.noticeUnread?'既読を保存しています...':'';message.className='muted';document.getElementById('notice-dialog').showModal();
+ try{if(e.noticeUnread){const result=await memberRequest('noticeMarkRead',{eventId:id,noticeVersion:e.noticeVersion});if(!result.ok)throw Error(result.message||'既読を保存できませんでした。');if(dashboardData){const current=dashboardData.upcoming.find(x=>String(x.eventId)===id);if(current&&current.noticeVersion===e.noticeVersion){current.noticeUnread=false;renderMemberNotices(dashboardData)}}if(noticeOpenId===id)message.textContent=''}}catch(error){if(noticeOpenId===id){message.className='error';message.textContent=error.message||'既読を保存できませんでした。もう一度お知らせを開いてください。'}}finally{button.disabled=false}
+});
+document.getElementById('notice-dialog-close').addEventListener('click',()=>{noticeOpenId='';document.getElementById('notice-dialog').close()});
 
 function renderMyPage(data){
+    dashboardData=data;renderMemberCollections(data);renderMemberNotices(data);
     const summary=document.getElementById('summary');
     summary.classList.remove('error');
     const history=[...(data.records||[])].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
@@ -88,11 +117,6 @@ function renderMyPage(data){
     const toNext=5-rem;
     summary.innerHTML=`<div class="shop-brand">MatchPoint</div><span class="member-caption">CLUB MEMBER</span><h2>ショップ スタンプカード</h2><div class="stamps" role="img" aria-label="5個ごとに特典。今回のカードは${rem}個獲得済み">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 33 20 9c1-3 5-2 5 1L15 35zm8 3L28 9c2-3 6-1 4 2L23 39zm9 4 10-24c2-3 6-1 4 2L32 43zM8 35c-4 4-2 9 2 11 4 1 7-1 8-4z"/></svg></span>`).join('')}</div><div class="progress"><span class="big">${rem}<small> / 5</small></span><span class="progress-text">あと <strong>${toNext}回</strong>で特典</span></div><p class="totals">累計 ${count}スタンプ</p>`;
     document.getElementById('reward-summary').innerHTML=`<p class="reward-label">利用できる特典</p><p class="reward-count">${data.availableBonus}<small>個</small></p><div class="reward-totals">獲得 <strong>${data.earnedBonus}個</strong><span aria-hidden="true">／</span>使用済み <strong>${data.redeemedBonus}個</strong></div><p class="reward-help muted">特典を受け取る際はスタッフにお声がけください。</p>`;
-    const upcoming=data.upcoming||[];
-    document.getElementById('upcoming').innerHTML=upcoming.length?upcoming.map(e=>{
-      const details=[e.startsAt?`日時：${escapeHtml(formatDate(e.startsAt))}`:'',e.location?`場所：${escapeHtml(e.location)}`:'',e.belongings?`持ち物：${escapeHtml(e.belongings)}`:''].filter(Boolean).join('<br>');
-      return `<div class="item"><strong>${escapeHtml(e.eventName)}</strong> <span class="pill ${['受付済み','期限切れ'].includes(e.status)?'done':''}">${escapeHtml(e.status)}</span>${details?`<div class="notice muted">${details}</div>`:''}</div>`;
-    }).join(''):'参加予定のイベントはありません。';
     let previousMonth='';
     document.getElementById('records').innerHTML=history.length
       ?history.map(r=>{
@@ -117,7 +141,7 @@ async function loadMyPage(){
   try{
     const accessToken=liff.getAccessToken();
     if(!accessToken)throw Error('LINEから開き直してください。');
-    const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'mypage',accessToken})});
+    const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'mypageV2',accessToken})});
     if(!response.ok)throw Error('通信エラーが発生しました。');
     const data=await response.json();
     if(!data.ok)throw Error(data.message||'読み込めませんでした。');
