@@ -78,14 +78,23 @@ document.getElementById('profile-back').addEventListener('click',()=>showProfile
 async function loadProfileName(){try{const profile=await liff.getProfile();clientUserId=profile.userId||'';document.getElementById('profile-name').textContent=profile.displayName||'名前未登録';restoreMemberCache()}catch(error){document.getElementById('profile-name').textContent='LINE名を取得できませんでした'}}
 
 let dashboardData=null;
-async function memberRequest(type,fields={}){
- const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINEから開き直してください。');
- const response=await fetch(API,{method:'POST',body:JSON.stringify({type,accessToken,...fields})});
- if(!response.ok)throw Error('通信エラーが発生しました。');return response.json();
+async function memberRequest(type,fields={}){return reliableRequest(type,fields);}
+async function reliableRequest(type,fields={}){
+ const financial=['stamp','manualCheckin','collectionPaymentConfirm','collectionPaymentCancel'].includes(type);
+ const payload={...fields};if(financial&&!payload.requestId)payload.requestId=globalThis.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(36).slice(2);
+ async function once(kind,body){const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINE認証が必要です。LINEから開き直してください。');const control=new AbortController(),timer=setTimeout(()=>control.abort(),18000);try{const r=await fetch(API,{method:'POST',body:JSON.stringify({type:kind,accessToken,...body}),signal:control.signal});if(!r.ok)throw Error('通信に失敗しました。');return await r.json();}catch(e){e.transport=true;throw e;}finally{clearTimeout(timer);}}
+ for(let attempt=0;attempt<4;attempt++){
+  try{const result=await once(type,payload);if(!result.retryable&&result.code!=='BUSY')return result;}
+  catch(error){if(!error.transport)throw error;if(financial){let s;try{s=await once(type==='stamp'?'receptionStatus':'collectionPaymentStatus',{eventId:payload.eventId,userId:payload.userId});}catch(e){throw Error('受付結果を確認できません。通信を確認し、表示を更新してから記録をご確認ください。');}if(!s.ok)throw Error(s.message||'受付結果を確認できません。');if(type==='collectionPaymentCancel'&&s.status==='none')return {...s,ok:true,recovered:true,canceled:true};if(type!=='collectionPaymentCancel'&&((type==='stamp'&&['pending','recorded','paid'].includes(s.status))||s.status==='paid'))return {...s,ok:true,recovered:true,alreadyConfirmed:s.status==='paid',paymentPending:s.status==='pending'};}else if(!['adminHome','adminSection','adminHistory','mypageFast','memberHistory','calendarHolidays','collectionPaymentPreview'].includes(type))throw error;}
+  if(attempt===3)throw Error('現在受付が混み合っています。少し待って表示を更新し、記録を確認してからお試しください。');
+  await new Promise(resolve=>setTimeout(resolve,300*2**attempt+Math.floor(Math.random()*300)));
+ }
 }
+
 function collectionQR(eventId){return String(eventId).startsWith('shuukin')||String(eventId).startsWith('saakurutiishatsushuukin')}
 function qrResultView(data,eventId){
  const collection=collectionQR(eventId),name=data.eventName||dashboardData?.collections?.find(c=>String(c.eventId)===eventId)?.eventName||dashboardData?.upcoming?.find(e=>String(e.eventId)===eventId)?.eventName||'';
+ if(data.recovered&&!data.paymentPending)return {title:collection?'集金済みを確認しました':'受付済みを確認しました',event:name,detail:collection?'追加の入金記録は作成していません。':'追加のスタンプ・参加記録は作成していません。',icon:'✓',kind:'success'};
  if(data.ok){if(data.paymentPending)return {title:'入金確認待ちです',event:name,detail:`料金 ${Number(data.amount).toLocaleString('ja-JP')}円。管理者にこの画面を見せ、入金の確認を受けてください。まだ集金済みにはなっていません。`,icon:'⌛',kind:'info'};if(collection)return {title:'集金受付が完了しました',event:name,detail:'集金済みとして記録しました。スタンプの付与はありません。',icon:'✓',kind:'success'};if(data.stampMode==='on')return {title:'スタンプを1個獲得しました！',event:name,detail:`累計 ${Number(data.stampCount)||0}スタンプ${data.availableBonus>0?' ／ 利用できる特典 '+data.availableBonus+'個':''}`,icon:'+1',kind:'success'};return {title:'参加を記録しました',event:name,detail:'今回は参加記録のみです。スタンプの付与はありません。',icon:'✓',kind:'success'}}
  const views={ALREADY_RECORDED:{title:collection?'この集金は集金済みです':'このイベントは記録済みです',detail:collection?'追加の集金記録は作成していません。':'同じイベントのスタンプ・参加記録は1回だけ取得できます。',icon:'i',kind:'info'},EXPIRED:{title:'QRコードの期限が切れています',detail:'スタッフに新しいQRコードをご確認ください。',icon:'⌛',kind:'warning'},PAUSED:{title:'受付を停止しています',detail:'スタッフに受付状況をご確認ください。',icon:'Ⅱ',kind:'warning'},INVALID_QR:{title:'このQRコードは使用できません',detail:'スタッフが現在表示しているQRコードを読み取ってください。',icon:'!',kind:'warning'}};
  return {...(views[data.code]||{title:'受付できませんでした',detail:data.message||'スタッフにご確認ください。',icon:'!',kind:'error'}),event:name};
@@ -142,7 +151,7 @@ function renderMyPage(data){
 let loadedOnce=false,refreshTask=null,clientUserId='',historyTask=null,historyVersion=0,historyLoaded=false,historyOffset=null;
 let profileRecords=[],profileRedemptions=[];
 function cacheKey(){return clientUserId?'matchpoint:member:v1:'+clientUserId:''}
-function restoreMemberCache(){try{const key=cacheKey();if(!key)return;const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&saved.userId===clientUserId&&Date.now()-saved.savedAt<86400000){renderMyPage(saved.data);loadedOnce=true;refreshStatus.textContent='前回の表示です。最新情報を確認中...'}}catch(error){}}
+function restoreMemberCache(){try{const key=cacheKey();if(!key)return;const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&saved.userId===clientUserId&&Date.now()-saved.savedAt<86400000){renderMyPage(saved.data);loadedOnce=true;refreshStatus.textContent='前回の表示（'+formatDate(new Date(saved.savedAt).toISOString())+'）。最新情報を確認中...'}}catch(error){}}
 function saveMemberCache(data){try{const key=cacheKey();if(key)localStorage.setItem(key,JSON.stringify({userId:clientUserId,savedAt:Date.now(),data}))}catch(error){}}
 function renderProfileHistory(data){
  document.getElementById('monthly-counts').innerHTML=data.monthly.length?data.monthly.map(m=>`<div class="monthly-item"><span>${escapeHtml(m.month.replace('-', '年')+'月')}</span><strong>${m.count}回</strong></div>`).join(''):'まだ参加履歴がありません。';
@@ -162,7 +171,7 @@ document.getElementById('history-more').addEventListener('click',()=>loadMemberH
 async function loadMyPage(force=false){
  if(refreshTask)return force?refreshTask.then(()=>loadMyPage()):refreshTask;
  refreshButton.disabled=true;refreshStatus.className='shop-status muted';refreshStatus.textContent='最新の記録を確認しています...';
- const task=(async()=>{try{const data=await memberRequest('mypageFast');if(!data.ok)throw Error(data.message||'読み込めませんでした。');
+ const task=(async()=>{try{const data=await memberRequest('mypageFast',{fresh:force});if(!data.ok)throw Error(data.message||'読み込めませんでした。');
  if(clientUserId&&data.userId!==clientUserId)throw Error('LINEのログイン状態を確認してください。');clientUserId=data.userId;document.getElementById('profile-name').textContent=data.userName||'名前未登録';
  renderMyPage(data);saveMemberCache(data);loadedOnce=true;historyVersion++;historyTask=null;historyLoaded=false;historyOffset=null;
  document.getElementById('history-more').hidden=true;for(const id of ['records','redemptions','monthly-counts'])document.getElementById(id).textContent='プロフィールを開くと読み込みます。';
@@ -170,7 +179,7 @@ async function loadMyPage(force=false){
  }catch(error){refreshStatus.className='shop-status error';refreshStatus.textContent=error.message||'通信エラーが発生しました。';if(!loadedOnce){const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent}}finally{refreshButton.disabled=false}})();
  refreshTask=task;try{await task}finally{if(refreshTask===task)refreshTask=null}
 }
-refreshButton.addEventListener('click',()=>loadMyPage());
+refreshButton.addEventListener('click',()=>loadMyPage(true));
 (async()=>{
   try{
     await liff.init({liffId:LIFF_ID});
