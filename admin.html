@@ -319,6 +319,7 @@ main{margin:0 auto 30px}
 <p class="muted">Googleスプレッドシートを開きます。アクセス権はGoogleの共有設定に従います。</p>
 <div class="menu-grid">
 <a id="sheetLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>参加記録</span><small>スプレッドシート</small></a>
+<a id="memberRegisterLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>登録者一覧</span><small>スプレッドシート</small></a>
 <a id="homeCollectionLink" target="_blank" rel="noopener noreferrer" hidden>▤ <span>集金記録</span><small>スプレッドシート</small></a>
 </div></section>
 <section class="box" id="events" hidden><h2>イベント</h2>
@@ -2718,6 +2719,7 @@ function render(){
  el('adminEntry').hidden=!state.canManageAdmins;
  const sheetLink=el('sheetLink');sheetLink.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.recordsSheetUrl||'');if(!sheetLink.hidden)sheetLink.href=state.recordsSheetUrl;
  el('adminGreeting').textContent=state.currentAdminName||state.adminUsers.find(a=>String(a.userId)===String(state.currentAdminId))?.userName||'管理者';
+ const memberLink=el('memberRegisterLink');memberLink.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.memberRegisterSheetUrl||'');if(!memberLink.hidden)memberLink.href=state.memberRegisterSheetUrl;
  const collectionHome=el('homeCollectionLink');collectionHome.hidden=!/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(state.collectionSheetUrl||'');if(!collectionHome.hidden)collectionHome.href=state.collectionSheetUrl;
  const nextPlan=(state.calendarPlans||[]).filter(p=>planRange(p).end>=calendarDay(new Date())&&(p.startsAt.length===10||Date.parse(p.endsAt||p.startsAt)>=Date.now())).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt))[0];
  const tiles=[['今日の参加者',state.stats.today,'calendar','人'],['総登録者',state.stats.registered,'people','人'],['次の予定',nextPlan?.title||'予定なし','calendar',''],['未使用特典',state.stats.available,'gift','件']];
