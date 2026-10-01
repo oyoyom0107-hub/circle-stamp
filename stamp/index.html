@@ -6,6 +6,18 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script><script>
 const API='https://script.google.com/macros/s/AKfycbxTYedx5VBpe5BPyIsQx0iNwS_3xZ3EaWfQDDyOGSQhP3TK6J0F-VWRfYvTjaOATawn/exec';
 const LIFF_ID='2011752461-qIktF1m8';
+async function reliableRequest(type,fields={}){
+ const financial=['stamp','manualCheckin','collectionPaymentConfirm','collectionPaymentCancel'].includes(type);
+ const payload={...fields};if(financial&&!payload.requestId)payload.requestId=globalThis.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(36).slice(2);
+ async function once(kind,body){const accessToken=liff.getAccessToken();if(!accessToken)throw Error('LINE認証が必要です。LINEから開き直してください。');const control=new AbortController(),timer=setTimeout(()=>control.abort(),18000);try{const r=await fetch(API,{method:'POST',body:JSON.stringify({type:kind,accessToken,...body}),signal:control.signal});if(!r.ok)throw Error('通信に失敗しました。');return await r.json();}catch(e){e.transport=true;throw e;}finally{clearTimeout(timer);}}
+ for(let attempt=0;attempt<4;attempt++){
+  try{const result=await once(type,payload);if(!result.retryable&&result.code!=='BUSY')return result;}
+  catch(error){if(!error.transport)throw error;if(financial){let s;try{s=await once(type==='stamp'?'receptionStatus':'collectionPaymentStatus',{eventId:payload.eventId,userId:payload.userId});}catch(e){throw Error('受付結果を確認できません。通信を確認し、表示を更新してから記録をご確認ください。');}if(!s.ok)throw Error(s.message||'受付結果を確認できません。');if(type==='collectionPaymentCancel'&&s.status==='none')return {...s,ok:true,recovered:true,canceled:true};if(type!=='collectionPaymentCancel'&&((type==='stamp'&&['pending','recorded','paid'].includes(s.status))||s.status==='paid'))return {...s,ok:true,recovered:true,alreadyConfirmed:s.status==='paid',paymentPending:s.status==='pending'};}else if(!['adminHome','adminSection','adminHistory','mypageFast','memberHistory','calendarHolidays','collectionPaymentPreview'].includes(type))throw error;}
+  if(attempt===3)throw Error('現在受付が混み合っています。少し待って表示を更新し、記録を確認してからお試しください。');
+  await new Promise(resolve=>setTimeout(resolve,300*2**attempt+Math.floor(Math.random()*300)));
+ }
+}
+
 function show(message,detail='',icon='⚠️'){
   document.getElementById('status').textContent=message;
   document.getElementById('detail').textContent=detail;
@@ -17,19 +29,26 @@ function show(message,detail='',icon='⚠️'){
     const eventId=qs.get('event'),code=qs.get('code');
     if(!eventId||!code)throw Error('有効なイベントQRを読み取ってください。');
     await liff.init({liffId:LIFF_ID});
-    if(!liff.isLoggedIn()){liff.login();return}
+    if(!liff.isLoggedIn()){
+      const redirectUrl=new URL(location.href);
+      redirectUrl.search=new URLSearchParams({event:eventId,code}).toString();
+      redirectUrl.hash='';
+      liff.login({redirectUri:redirectUrl.href});
+      return;
+    }
     const accessToken=liff.getAccessToken();
     if(!accessToken)throw Error('LINE認証が必要です。LINEから開き直してください。');
-    const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'stamp',accessToken,eventId,code})});
-    const data=await response.json();
+    const data=await reliableRequest('stamp',{eventId,code});
     document.getElementById('mypage').hidden=false;
-    if(!response.ok||!data.ok){
+    if(!data.ok){
       if(data.code==='ALREADY_RECORDED')show('このイベントは記録済みです','同じ活動のスタンプは1回だけ取得できます。','ℹ️');
       else if(data.code==='PAUSED')show('このイベントは受付停止中です','スタッフにご確認ください。','⏸️');
       else if(data.code==='EXPIRED')show('QRコードの期限が切れています','スタッフに新しいQRコードをご確認ください。','⌛');
       else show('スタンプを記録できませんでした',data.message||'スタッフにご確認ください。');
       return;
     }
+    if(data.paymentPending){show('入金確認待ちです',`${data.eventName} ／ ${Number(data.amount).toLocaleString('ja-JP')}円。管理者にこの画面を見せ、入金の確認を受けてください。まだ集金済みではありません。`,'⌛');return;}
+    if(data.recovered){show('受付済みを確認しました',data.eventName+' ／ 追加の記録は作成していません。','✅');return;}
     if(data.stampMode==='on'){
       show('スタンプを1個取得しました！',`${data.eventName} ／ 現在 ${data.stampCount}個${data.availableBonus>0?` ／ 利用可能な特典 ${data.availableBonus}個`:''}`,'✅');
     }else{
