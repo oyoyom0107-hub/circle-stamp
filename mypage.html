@@ -45,7 +45,7 @@
 <nav class="history-menu" aria-label="履歴"><a href="#history-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg>参加履歴<span aria-hidden="true">›</span></a><a href="#bonus-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12v9h16v-9M12 7v14"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 7C3 8 5-2 12 7c7-9 9 1 0 0"/></svg>特典履歴<span aria-hidden="true">›</span></a></nav>
 <section class="card" id="history-card"><h2>スタンプ・参加履歴</h2><div id="records"></div></section>
 <section class="card"><h2>月別の参加回数</h2><p class="muted">スタンプなしの参加、集金の受付、スタンプを訂正した参加も含みます。</p><div id="monthly-counts"></div></section>
-<section class="card" id="bonus-card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section>
+<section class="card" id="bonus-card"><h2>特典の利用履歴</h2><div id="redemptions"></div></section><p id="profile-history-state" class="muted" role="status"></p><button id="history-more" type="button" class="profile-back" hidden>履歴をさらに読み込む</button>
 </section>
 </main>
 <dialog id="qr-result-dialog" class="member-dialog" aria-labelledby="qr-result-title"><div id="qr-result-icon" class="result-icon" aria-hidden="true"></div><h2 id="qr-result-title"></h2><p id="qr-result-event"></p><p id="qr-result-detail"></p><button id="qr-result-close" type="button">マイページに戻る</button></dialog>
@@ -70,12 +70,12 @@ function showProfile(open){
  document.getElementById('profile-screen').hidden=!open;
  document.getElementById('profile-button').setAttribute('aria-expanded',String(open));
  window.scrollTo({top:open?0:profileReturnScroll,behavior:'instant'});
- if(open)document.getElementById('profile-back').focus({preventScroll:true});
+ if(open){document.getElementById('profile-back').focus({preventScroll:true});void loadMemberHistory()}
  else document.getElementById('profile-button').focus({preventScroll:true});
 }
 document.getElementById('profile-button').addEventListener('click',()=>showProfile(document.getElementById('profile-screen').hidden));
 document.getElementById('profile-back').addEventListener('click',()=>showProfile(false));
-async function loadProfileName(){try{const profile=await liff.getProfile();document.getElementById('profile-name').textContent=profile.displayName||'名前未登録'}catch(error){document.getElementById('profile-name').textContent='LINE名を取得できませんでした'}}
+async function loadProfileName(){try{const profile=await liff.getProfile();clientUserId=profile.userId||'';document.getElementById('profile-name').textContent=profile.displayName||'名前未登録';restoreMemberCache()}catch(error){document.getElementById('profile-name').textContent='LINE名を取得できませんでした'}}
 
 let dashboardData=null;
 async function memberRequest(type,fields={}){
@@ -105,7 +105,7 @@ scanButton.addEventListener('click',async()=>{
   if(scanned.origin!==expected.origin||scanned.pathname!==expected.pathname||!scanned.searchParams.get('event')||!scanned.searchParams.get('code'))throw Error('このサークルの参加用QRコードを読み取ってください。');
   const eventId=scanned.searchParams.get('event');scanStatus.textContent='受付結果を確認しています...';submitted=true;
   const data=await memberRequest('stamp',{eventId,code:scanned.searchParams.get('code')});showQRResult(qrResultView(data,eventId));scanStatus.textContent='';
-  if(data.ok||data.code==='ALREADY_RECORDED')await loadMyPage();
+  if(data.ok||data.code==='ALREADY_RECORDED')await loadMyPage(true);
  }catch(error){scanStatus.className='shop-status error';scanStatus.textContent=error.message||'読み取りに失敗しました。';showQRResult({title:submitted?'受付結果を確認できませんでした':'QRコードを読み取れませんでした',event:'',detail:submitted?'通信状況を確認し、「表示を更新」で記録をご確認ください。':scanStatus.textContent,icon:'!',kind:'error'})}
  finally{scanButton.disabled=false}
 });
@@ -132,62 +132,50 @@ function renderMyPage(data){
     dashboardData=data;renderMemberCollections(data);renderMemberNotices(data);document.getElementById('reward-compact').textContent='利用できる特典 '+data.availableBonus+'個';
     const summary=document.getElementById('summary');
     summary.classList.remove('error');
-    const history=[...(data.records||[])].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-    const monthly=new Map();
-    history.forEach(r=>{const month=formatMonth(r.timestamp);monthly.set(month,(monthly.get(month)||0)+1)});
-    document.getElementById('monthly-counts').innerHTML=monthly.size
-      ?[...monthly].map(([month,count])=>`<div class="monthly-item"><span>${escapeHtml(month)}</span><strong>${count}回</strong></div>`).join('')
-      :'まだ参加履歴がありません。';
     const count=data.stampCount;
     const rem=count%5;
     const toNext=5-rem;
     summary.innerHTML=`<div class="shop-brand">MatchPoint</div><span class="member-caption">CLUB MEMBER</span><h2>ショップ スタンプカード</h2><div class="stamps" role="img" aria-label="5個ごとに特典。今回のカードは${rem}個獲得済み">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 33 20 9c1-3 5-2 5 1L15 35zm8 3L28 9c2-3 6-1 4 2L23 39zm9 4 10-24c2-3 6-1 4 2L32 43zM8 35c-4 4-2 9 2 11 4 1 7-1 8-4z"/></svg></span>`).join('')}</div><div class="progress"><span class="big">${rem}<small> / 5</small></span><span class="progress-text">あと <strong>${toNext}回</strong>で特典</span></div><p class="totals">累計 ${count}スタンプ</p>`;
     document.getElementById('reward-summary').innerHTML=`<p class="reward-label">利用できる特典</p><p class="reward-count">${data.availableBonus}<small>個</small></p><div class="reward-totals">獲得 <strong>${data.earnedBonus}個</strong><span aria-hidden="true">／</span>使用済み <strong>${data.redeemedBonus}個</strong></div><p class="reward-help muted">特典を受け取る際はスタッフにお声がけください。</p>`;
-    let previousMonth='';
-    document.getElementById('records').innerHTML=history.length
-      ?history.map(r=>{
-        const month=formatMonth(r.timestamp);
-        const heading=month===previousMonth?'':`<h3 class="month">${escapeHtml(month)}</h3>`;
-        previousMonth=month;
-        return `${heading}<div class="record"><div><strong>${escapeHtml(r.eventName||'イベント')}</strong><div class="muted">${escapeHtml(formatDate(r.timestamp))}</div></div><span class="tag ${r.revoked||r.stampMode!=='on'?'off':''}">${r.revoked?'訂正済み':r.collection?('集金・'+(r.paymentStatus||'未入金')):r.stampMode==='on'?'+1 スタンプ':'参加のみ'}</span></div>`;
-      }).join('')
-      :'まだ参加履歴がありません。';
-    const redemptions=[...(data.redemptions||[])].sort((a,b)=>new Date(b.redeemedAt)-new Date(a.redeemedAt));
-    document.getElementById('redemptions').innerHTML=redemptions.length
-      ?redemptions.map(r=>`<div class="record"><div><strong>🎁 特典を使用</strong><div class="muted">${escapeHtml(formatDate(r.redeemedAt))}</div></div><span class="tag off">使用済み</span></div>`).join('')
-      :'まだ特典を使用していません。';
 }
 
-let loadedOnce=false;
-async function loadMyPage(){
-  if(refreshButton.disabled&&loadedOnce)return;
-  refreshButton.disabled=true;
-  refreshStatus.className='shop-status muted';
-  refreshStatus.textContent='最新の記録を確認しています...';
-  try{
-    const accessToken=liff.getAccessToken();
-    if(!accessToken)throw Error('LINEから開き直してください。');
-    const response=await fetch(API,{method:'POST',body:JSON.stringify({type:'mypageV2',accessToken})});
-    if(!response.ok)throw Error('通信エラーが発生しました。');
-    const data=await response.json();
-    if(!data.ok)throw Error(data.message||'読み込めませんでした。');
-    renderMyPage(data);
-    loadedOnce=true;
-    refreshStatus.textContent='最新の記録に更新しました。';
-  }catch(error){
-    refreshStatus.className='shop-status error';
-    refreshStatus.textContent=error.message||'通信エラーが発生しました。';
-    if(!loadedOnce){const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent}
-  }finally{
-    refreshButton.disabled=false;
-  }
+let loadedOnce=false,refreshTask=null,clientUserId='',historyTask=null,historyVersion=0,historyLoaded=false,historyOffset=null;
+let profileRecords=[],profileRedemptions=[];
+function cacheKey(){return clientUserId?'matchpoint:member:v1:'+clientUserId:''}
+function restoreMemberCache(){try{const key=cacheKey();if(!key)return;const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&saved.userId===clientUserId&&Date.now()-saved.savedAt<86400000){renderMyPage(saved.data);loadedOnce=true;refreshStatus.textContent='前回の表示です。最新情報を確認中...'}}catch(error){}}
+function saveMemberCache(data){try{const key=cacheKey();if(key)localStorage.setItem(key,JSON.stringify({userId:clientUserId,savedAt:Date.now(),data}))}catch(error){}}
+function renderProfileHistory(data){
+ document.getElementById('monthly-counts').innerHTML=data.monthly.length?data.monthly.map(m=>`<div class="monthly-item"><span>${escapeHtml(m.month.replace('-', '年')+'月')}</span><strong>${m.count}回</strong></div>`).join(''):'まだ参加履歴がありません。';
+ let month='';document.getElementById('records').innerHTML=profileRecords.length?profileRecords.map(r=>{const current=formatMonth(r.timestamp),heading=month===current?'':`<h3 class="month">${escapeHtml(current)}</h3>`;month=current;return `${heading}<div class="record"><div><strong>${escapeHtml(r.eventName||'イベント')}</strong><div class="muted">${escapeHtml(formatDate(r.timestamp))}</div></div><span class="tag ${r.revoked||r.stampMode!=='on'?'off':''}">${r.revoked?'訂正済み':r.collection?'集金済み':r.stampMode==='on'?'+1 スタンプ':'参加のみ'}</span></div>`}).join(''):'まだ参加履歴がありません。';
+ document.getElementById('redemptions').innerHTML=profileRedemptions.length?profileRedemptions.map(r=>`<div class="record"><div><strong>🎁 特典を使用</strong><div class="muted">${escapeHtml(formatDate(r.redeemedAt))}</div></div><span class="tag off">使用済み</span></div>`).join(''):'まだ特典を使用していません。';
 }
-refreshButton.addEventListener('click',loadMyPage);
+async function loadMemberHistory(more=false){
+ if(historyTask)return historyTask;if(historyLoaded&&!more)return;if(more&&historyOffset==null)return;
+ const version=historyVersion,offset=more?historyOffset:0,button=document.getElementById('history-more'),message=document.getElementById('profile-history-state');
+ button.disabled=true;message.textContent='履歴を確認しています...';
+ const task=(async()=>{try{const data=await memberRequest('memberHistory',{offset});if(!data.ok)throw Error(data.message||'履歴を取得できませんでした。');if(version!==historyVersion)return;
+ profileRecords=more?profileRecords.concat(data.records):data.records;profileRedemptions=more?profileRedemptions.concat(data.redemptions):data.redemptions;renderProfileHistory(data);historyLoaded=true;historyOffset=data.nextOffset;button.hidden=historyOffset==null;button.textContent='履歴をさらに読み込む';message.textContent='';
+ }catch(error){if(version===historyVersion){message.textContent=error.message||'履歴を取得できませんでした。';button.hidden=false;button.textContent='履歴の読み込みを再試行'}}finally{if(version===historyVersion)button.disabled=false}})();
+ historyTask=task;try{await task}finally{if(historyTask===task)historyTask=null}
+}
+document.getElementById('history-more').addEventListener('click',()=>loadMemberHistory(historyLoaded));
+async function loadMyPage(force=false){
+ if(refreshTask)return force?refreshTask.then(()=>loadMyPage()):refreshTask;
+ refreshButton.disabled=true;refreshStatus.className='shop-status muted';refreshStatus.textContent='最新の記録を確認しています...';
+ const task=(async()=>{try{const data=await memberRequest('mypageFast');if(!data.ok)throw Error(data.message||'読み込めませんでした。');
+ if(clientUserId&&data.userId!==clientUserId)throw Error('LINEのログイン状態を確認してください。');clientUserId=data.userId;document.getElementById('profile-name').textContent=data.userName||'名前未登録';
+ renderMyPage(data);saveMemberCache(data);loadedOnce=true;historyVersion++;historyTask=null;historyLoaded=false;historyOffset=null;
+ document.getElementById('history-more').hidden=true;for(const id of ['records','redemptions','monthly-counts'])document.getElementById(id).textContent='プロフィールを開くと読み込みます。';
+ refreshStatus.textContent='最新の記録に更新しました。';if(!document.getElementById('profile-screen').hidden)void loadMemberHistory();
+ }catch(error){refreshStatus.className='shop-status error';refreshStatus.textContent=error.message||'通信エラーが発生しました。';if(!loadedOnce){const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent}}finally{refreshButton.disabled=false}})();
+ refreshTask=task;try{await task}finally{if(refreshTask===task)refreshTask=null}
+}
+refreshButton.addEventListener('click',()=>loadMyPage());
 (async()=>{
   try{
     await liff.init({liffId:LIFF_ID});
     if(!liff.isLoggedIn()){liff.login({redirectUri:new URL('mypage.html',location.href).href});return}
-    void loadProfileName();
+    await loadProfileName();
     if(liff.isApiAvailable('scanCodeV2')){
       scanButton.disabled=false;
       scanStatus.textContent='活動会場のQRコードにカメラを向けてください。';
