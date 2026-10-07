@@ -27,13 +27,15 @@
 .member-dialog{width:calc(100% - 36px);max-width:410px;max-height:85dvh;overflow:auto;border:1px solid #dbeae1;border-radius:24px;padding:26px 22px;background:#fff;color:#093e39;box-shadow:0 20px 60px #003b3533}.member-dialog::backdrop{background:#002e2866}.member-dialog h2{font-size:22px;line-height:1.4;margin:14px 0 10px;overflow-wrap:anywhere}.member-dialog p{overflow-wrap:anywhere}.member-dialog button{font:inherit;border:0;border-radius:12px;background:#076a59;color:white;padding:11px 16px;cursor:pointer;width:100%;margin-top:14px}.result-icon{width:64px;height:64px;border-radius:50%;background:#e1f3e9;color:#08705a;margin:auto;display:grid;place-items:center;font-size:34px;font-weight:750}.result-icon.info{background:#e9f2f8;color:#347286}.result-icon.warning{background:#fff1d6;color:#9e741d}.result-icon.error{background:#fce8ec;color:#a62d3f}#qr-result-dialog{text-align:center}#qr-result-event{font-weight:700}#qr-result-detail{color:#688079;font-size:14px}#notice-dialog-details{font-size:14px;line-height:1.8;white-space:pre-line}#notice-dialog-state{font-size:12px}
 
 .member-mark{background:#f8fcf9;color:#075d56;cursor:pointer;padding:0;min-width:44px;min-height:44px}.page-toolbar{display:flex;justify-content:flex-end;margin:-6px 0 12px}.page-toolbar .refresh-button{color:#075d56;background:#e0f0e9;border:0;padding:6px 10px;font-size:11px;min-height:32px}.profile-back{font:inherit;font-size:13px;font-weight:700;color:#075d56;background:#e0f0e9;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;margin-bottom:18px}.profile-card{text-align:center}.profile-avatar{display:grid;place-items:center;margin:0 auto 14px;width:55px;height:55px;border-radius:50%;color:#08705a;background:#e1f3e9;font-size:26px}.profile-name{font-size:24px;font-weight:750;overflow-wrap:anywhere;margin:8px 0}.reward-compact{font-size:20px;font-weight:750;margin:0 0 12px}.card details summary{cursor:pointer;font-size:13px;color:#176c52;padding:8px 0}.card details[open]>summary{margin-bottom:10px}#profile-screen{scroll-margin-top:16px}.collection-paid{margin-top:14px}.notice-count{font-size:12px;color:#926c18;margin:0 0 10px}
+/* Clear, compact menu entry. */
+.member-mark{width:auto;height:auto;min-height:44px;display:flex;gap:7px;padding:9px 12px;border-radius:14px;background:#e0f0e9;box-shadow:0 3px 9px #064b3812;font:inherit;font-size:12px;font-weight:750}.member-mark svg{width:20px;height:20px}.member-mark:active{background:#cce7dc}.header h1{font-size:clamp(23px,5.8vw,35px)}
 </style>
 </head>
 <body>
-<header class="header"><h1>Match Point<span>マイページ</span></h1><button type="button" id="profile-button" class="member-mark" aria-label="プロフィールと履歴を開く" aria-controls="profile-screen" aria-expanded="false"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3z"/></svg></button></header>
+<header class="header"><h1>Match Point<span>マイページ</span></h1><button type="button" id="profile-button" class="member-mark" aria-label="プロフィールと履歴を開く" aria-controls="profile-screen" aria-expanded="false"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3z"/></svg><span>メニュー</span></button></header>
 <main>
 <div id="mypage-screen"><div class="page-toolbar"><button type="button" id="refresh-button" class="refresh-button" disabled>↻ 表示を更新</button></div>
-<section class="card shop" aria-label="ショップカード"><div id="summary" aria-live="polite">読み込み中...</div></section>
+<section class="card shop" aria-label="活動スタンプカード"><div id="summary" aria-live="polite">読み込み中...</div></section>
 <div class="outside-actions"><div class="shop-actions"><button type="button" id="scan-button" class="scan-button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM21 15v6h-6M12 3v3M12 12h3M3 12h3M12 18v3"/></svg>QRコードを読み取る</button></div><p id="refresh-status" class="shop-status muted" role="status">読み込み中...</p><p id="scan-status" class="shop-status muted" role="status">読み取り機能を確認中...</p></div>
 <section class="card rewards" aria-labelledby="reward-heading"><h2 id="reward-heading" class="section-heading"><span aria-hidden="true">🎁</span>特典</h2><p id="reward-compact" class="reward-compact" aria-live="polite">読み込み中...</p><details><summary>特典の詳細を見る</summary><div id="reward-summary" aria-live="polite">読み込み中...</div></details></section>
 <section class="card" aria-labelledby="collection-heading"><h2 id="collection-heading" class="section-heading"><span aria-hidden="true">▤</span>自分の集金状況</h2><div id="member-collections" aria-live="polite">読み込み中...</div></section>
@@ -75,7 +77,7 @@ function showProfile(open){
 }
 document.getElementById('profile-button').addEventListener('click',()=>showProfile(document.getElementById('profile-screen').hidden));
 document.getElementById('profile-back').addEventListener('click',()=>showProfile(false));
-async function loadProfileName(){try{const profile=await liff.getProfile();clientUserId=profile.userId||'';document.getElementById('profile-name').textContent=profile.displayName||'名前未登録';restoreMemberCache()}catch(error){document.getElementById('profile-name').textContent='LINE名を取得できませんでした'}}
+async function loadProfileName(){try{const profile=await liff.getProfile();if(clientUserId&&clientUserId!==profile.userId)return;clientUserId=profile.userId||'';if(!dashboardData){document.getElementById('profile-name').textContent=profile.displayName||'名前未登録';restoreMemberCache()}}catch(error){if(!dashboardData)document.getElementById('profile-name').textContent='LINE名を確認中...'}}
 
 let dashboardData=null;
 async function memberRequest(type,fields={}){return reliableRequest(type,fields);}
@@ -137,14 +139,23 @@ document.getElementById('upcoming').addEventListener('click',async ev=>{
 });
 document.getElementById('notice-dialog-close').addEventListener('click',()=>{noticeOpenId='';document.getElementById('notice-dialog').close()});
 
+// Render lower cards only when visible; the API remains authoritative.
+const visibleSections=new Set();
+const sectionRenderers={'member-collections':renderMemberCollections,upcoming:renderMemberNotices};
+function renderVisibleSections(){if(!dashboardData)return;for(const id of visibleSections)sectionRenderers[id](dashboardData)}
+if('IntersectionObserver' in window){
+ const sectionObserver=new IntersectionObserver(entries=>{for(const entry of entries){const id=entry.target.id;if(entry.isIntersecting){visibleSections.add(id);if(dashboardData)sectionRenderers[id](dashboardData)}else visibleSections.delete(id)}},{rootMargin:'80px 0px'});
+ for(const id of Object.keys(sectionRenderers))sectionObserver.observe(document.getElementById(id));
+}else for(const id of Object.keys(sectionRenderers))visibleSections.add(id);
+
 function renderMyPage(data){
-    dashboardData=data;renderMemberCollections(data);renderMemberNotices(data);document.getElementById('reward-compact').textContent='利用できる特典 '+data.availableBonus+'個';
+    dashboardData=data;renderVisibleSections();document.getElementById('reward-compact').textContent='利用できる特典 '+data.availableBonus+'個';
     const summary=document.getElementById('summary');
     summary.classList.remove('error');
     const count=data.stampCount;
     const rem=count%5;
     const toNext=5-rem;
-    summary.innerHTML=`<div class="shop-brand">Match Point</div><span class="member-caption">CLUB MEMBER</span><h2>ショップ スタンプカード</h2><div class="stamps" role="img" aria-label="5個ごとに特典。今回のカードは${rem}個獲得済み">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 33 20 9c1-3 5-2 5 1L15 35zm8 3L28 9c2-3 6-1 4 2L23 39zm9 4 10-24c2-3 6-1 4 2L32 43zM8 35c-4 4-2 9 2 11 4 1 7-1 8-4z"/></svg></span>`).join('')}</div><div class="progress"><span class="big">${rem}<small> / 5</small></span><span class="progress-text">あと <strong>${toNext}回</strong>で特典</span></div><p class="totals">累計 ${count}スタンプ</p>`;
+    summary.innerHTML=`<div class="shop-brand">Match Point</div><span class="member-caption">CLUB MEMBER</span><h2>活動スタンプカード</h2><div class="stamps" role="img" aria-label="5個ごとに特典。今回のカードは${rem}個獲得済み">${Array.from({length:5},(_,i)=>`<span class="stamp ${i<rem?'on':''}" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 33 20 9c1-3 5-2 5 1L15 35zm8 3L28 9c2-3 6-1 4 2L23 39zm9 4 10-24c2-3 6-1 4 2L32 43zM8 35c-4 4-2 9 2 11 4 1 7-1 8-4z"/></svg></span>`).join('')}</div><div class="progress"><span class="big">${rem}<small> / 5</small></span><span class="progress-text">あと <strong>${toNext}回</strong>で特典</span></div><p class="totals">累計 ${count}スタンプ</p>`;
     document.getElementById('reward-summary').innerHTML=`<p class="reward-label">利用できる特典</p><p class="reward-count">${data.availableBonus}<small>個</small></p><div class="reward-totals">獲得 <strong>${data.earnedBonus}個</strong><span aria-hidden="true">／</span>使用済み <strong>${data.redeemedBonus}個</strong></div><p class="reward-help muted">特典を受け取る際はスタッフにお声がけください。</p>`;
 }
 
@@ -169,11 +180,11 @@ async function loadMemberHistory(more=false){
 }
 document.getElementById('history-more').addEventListener('click',()=>loadMemberHistory(historyLoaded));
 async function loadMyPage(force=false){
- if(refreshTask)return force?refreshTask.then(()=>loadMyPage()):refreshTask;
+ if(refreshTask){const pending=refreshTask;if(!force)return pending;await pending;if(refreshTask===pending)refreshTask=null;return loadMyPage(true)}
  refreshButton.disabled=true;refreshStatus.className='shop-status muted';refreshStatus.textContent='最新の記録を確認しています...';
  const task=(async()=>{try{const data=await memberRequest('mypageFast',{fresh:force});if(!data.ok)throw Error(data.message||'読み込めませんでした。');
  if(clientUserId&&data.userId!==clientUserId)throw Error('LINEのログイン状態を確認してください。');clientUserId=data.userId;document.getElementById('profile-name').textContent=data.userName||'名前未登録';
- renderMyPage(data);saveMemberCache(data);loadedOnce=true;historyVersion++;historyTask=null;historyLoaded=false;historyOffset=null;
+ if(JSON.stringify(dashboardData)!==JSON.stringify(data))renderMyPage(data);saveMemberCache(data);loadedOnce=true;historyVersion++;historyTask=null;historyLoaded=false;historyOffset=null;
  document.getElementById('history-more').hidden=true;for(const id of ['records','redemptions','monthly-counts'])document.getElementById(id).textContent='プロフィールを開くと読み込みます。';
  refreshStatus.textContent='最新の記録に更新しました。';if(!document.getElementById('profile-screen').hidden)void loadMemberHistory();
  }catch(error){refreshStatus.className='shop-status error';refreshStatus.textContent=error.message||'通信エラーが発生しました。';if(!loadedOnce){const summary=document.getElementById('summary');summary.classList.add('error');summary.textContent=refreshStatus.textContent}}finally{refreshButton.disabled=false}})();
@@ -184,7 +195,7 @@ refreshButton.addEventListener('click',()=>loadMyPage(true));
   try{
     await liff.init({liffId:LIFF_ID});
     if(!liff.isLoggedIn()){liff.login({redirectUri:new URL('mypage.html',location.href).href});return}
-    await loadProfileName();
+    void loadProfileName();
     if(liff.isApiAvailable('scanCodeV2')){
       scanButton.disabled=false;
       scanStatus.textContent='活動会場のQRコードにカメラを向けてください。';
