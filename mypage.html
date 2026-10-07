@@ -29,6 +29,7 @@
 .member-mark{background:#f8fcf9;color:#075d56;cursor:pointer;padding:0;min-width:44px;min-height:44px}.page-toolbar{display:flex;justify-content:flex-end;margin:-6px 0 12px}.page-toolbar .refresh-button{color:#075d56;background:#e0f0e9;border:0;padding:6px 10px;font-size:11px;min-height:32px}.profile-back{font:inherit;font-size:13px;font-weight:700;color:#075d56;background:#e0f0e9;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;margin-bottom:18px}.profile-card{text-align:center}.profile-avatar{display:grid;place-items:center;margin:0 auto 14px;width:55px;height:55px;border-radius:50%;color:#08705a;background:#e1f3e9;font-size:26px}.profile-name{font-size:24px;font-weight:750;overflow-wrap:anywhere;margin:8px 0}.reward-compact{font-size:20px;font-weight:750;margin:0 0 12px}.card details summary{cursor:pointer;font-size:13px;color:#176c52;padding:8px 0}.card details[open]>summary{margin-bottom:10px}#profile-screen{scroll-margin-top:16px}.collection-paid{margin-top:14px}.notice-count{font-size:12px;color:#926c18;margin:0 0 10px}
 /* Clear, compact menu entry. */
 .member-mark{width:auto;height:auto;min-height:44px;display:flex;gap:7px;padding:9px 12px;border-radius:14px;background:#e0f0e9;box-shadow:0 3px 9px #064b3812;font:inherit;font-size:12px;font-weight:750}.member-mark svg{width:20px;height:20px}.member-mark:active{background:#cce7dc}.header h1{font-size:clamp(23px,5.8vw,35px)}
+.member-photo{width:24px;height:24px;border-radius:50%;object-fit:cover}.profile-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
 </style>
 </head>
 <body>
@@ -77,7 +78,16 @@ function showProfile(open){
 }
 document.getElementById('profile-button').addEventListener('click',()=>showProfile(document.getElementById('profile-screen').hidden));
 document.getElementById('profile-back').addEventListener('click',()=>showProfile(false));
-async function loadProfileName(){try{const profile=await liff.getProfile();if(clientUserId&&clientUserId!==profile.userId)return;clientUserId=profile.userId||'';if(!dashboardData){document.getElementById('profile-name').textContent=profile.displayName||'名前未登録';restoreMemberCache()}}catch(error){if(!dashboardData)document.getElementById('profile-name').textContent='LINE名を確認中...'}}
+function setLinePicture(url){
+ if(!url)return;
+ let parsed;try{parsed=new URL(url)}catch(error){return}if(parsed.protocol!=='https:')return;
+ for(const target of [document.querySelector('#profile-button svg'),document.querySelector('.profile-avatar')]){
+  if(!target)continue;const img=new Image();img.className='member-photo';img.alt='';img.decoding='async';img.referrerPolicy='no-referrer';
+  img.onload=()=>{if(target.tagName.toLowerCase()==='svg')target.replaceWith(img);else target.replaceChildren(img)};
+  img.src=parsed.href;
+ }
+}
+async function loadProfileName(){try{const profile=await liff.getProfile();setLinePicture(profile.pictureUrl);if(clientUserId&&clientUserId!==profile.userId)return;clientUserId=profile.userId||'';if(!dashboardData){document.getElementById('profile-name').textContent=profile.displayName||'名前未登録';restoreMemberCache()}}catch(error){if(!dashboardData)document.getElementById('profile-name').textContent='LINE名を確認中...'}}
 
 let dashboardData=null;
 async function memberRequest(type,fields={}){return reliableRequest(type,fields);}
@@ -202,7 +212,7 @@ refreshButton.addEventListener('click',()=>loadMyPage(true));
     }else{
       scanStatus.textContent='この環境では読み取れません。LINE Developersの「Scan QR」とLIFF画面サイズ「Full」を確認してください。';
     }
-    await loadMyPage(true);
+    await loadMyPage();
   }catch(error){
     refreshStatus.className='shop-status error';
     refreshStatus.textContent=error.message||'LINEの初期化に失敗しました。';
