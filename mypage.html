@@ -142,9 +142,9 @@ document.getElementById('notice-dialog-close').addEventListener('click',()=>{not
 // Render lower cards only when visible; the API remains authoritative.
 const visibleSections=new Set();
 const sectionRenderers={'member-collections':renderMemberCollections,upcoming:renderMemberNotices};
-function renderVisibleSections(){if(!dashboardData)return;for(const id of visibleSections)sectionRenderers[id](dashboardData)}
+function renderVisibleSections(){if(!dashboardData||dashboardData.cachedDisplay)return;for(const id of visibleSections)sectionRenderers[id](dashboardData)}
 if('IntersectionObserver' in window){
- const sectionObserver=new IntersectionObserver(entries=>{for(const entry of entries){const id=entry.target.id;if(entry.isIntersecting){visibleSections.add(id);if(dashboardData)sectionRenderers[id](dashboardData)}else visibleSections.delete(id)}},{rootMargin:'80px 0px'});
+ const sectionObserver=new IntersectionObserver(entries=>{for(const entry of entries){const id=entry.target.id;if(entry.isIntersecting){visibleSections.add(id);if(dashboardData&&!dashboardData.cachedDisplay)sectionRenderers[id](dashboardData)}else visibleSections.delete(id)}},{rootMargin:'80px 0px'});
  for(const id of Object.keys(sectionRenderers))sectionObserver.observe(document.getElementById(id));
 }else for(const id of Object.keys(sectionRenderers))visibleSections.add(id);
 
@@ -162,7 +162,7 @@ function renderMyPage(data){
 let loadedOnce=false,refreshTask=null,clientUserId='',historyTask=null,historyVersion=0,historyLoaded=false,historyOffset=null;
 let profileRecords=[],profileRedemptions=[];
 function cacheKey(){return clientUserId?'matchpoint:member:v1:'+clientUserId:''}
-function restoreMemberCache(){try{const key=cacheKey();if(!key)return;const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&saved.userId===clientUserId&&Date.now()-saved.savedAt<86400000){renderMyPage(saved.data);loadedOnce=true;refreshStatus.textContent='前回の表示（'+formatDate(new Date(saved.savedAt).toISOString())+'）。最新情報を確認中...'}}catch(error){}}
+function restoreMemberCache(){try{const key=cacheKey();if(!key)return;const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&saved.userId===clientUserId&&Date.now()-saved.savedAt<86400000){renderMyPage({...saved.data,collections:[],upcoming:[],cachedDisplay:true});document.getElementById('member-collections').textContent='最新の集金状況を確認しています...';document.getElementById('upcoming').textContent='最新の参加予定を確認しています...';loadedOnce=true;refreshStatus.textContent='前回の表示（'+formatDate(new Date(saved.savedAt).toISOString())+'）。最新情報を確認中...'}}catch(error){}}
 function saveMemberCache(data){try{const key=cacheKey();if(key)localStorage.setItem(key,JSON.stringify({userId:clientUserId,savedAt:Date.now(),data}))}catch(error){}}
 function renderProfileHistory(data){
  document.getElementById('monthly-counts').innerHTML=data.monthly.length?data.monthly.map(m=>`<div class="monthly-item"><span>${escapeHtml(m.month.replace('-', '年')+'月')}</span><strong>${m.count}回</strong></div>`).join(''):'まだ参加履歴がありません。';
@@ -202,7 +202,7 @@ refreshButton.addEventListener('click',()=>loadMyPage(true));
     }else{
       scanStatus.textContent='この環境では読み取れません。LINE Developersの「Scan QR」とLIFF画面サイズ「Full」を確認してください。';
     }
-    await loadMyPage();
+    await loadMyPage(true);
   }catch(error){
     refreshStatus.className='shop-status error';
     refreshStatus.textContent=error.message||'LINEの初期化に失敗しました。';
